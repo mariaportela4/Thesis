@@ -16,7 +16,7 @@ SLEEP = 0.34
 
 # ---------- NEGATIVE QUERY ----------
 query = r'''
-(viruses[porgn:txid2731619] AND srcdb_refseq[PROP])
+(viruses[porgn:txid2731619] AND srcdb_refseq[PROP]) AND (250:1250[SLEN])
 NOT (lyase*[Title] OR pectate*[Title] OR pectin*[Title] OR depolymerase*[Title]
 OR glycanase*[Title] OR endoglycosidase*[Title] OR alginate*[Title]
 OR rhamnosidase*[Title] OR hyaluronidase*[Title] OR hyaluronate*[Title]

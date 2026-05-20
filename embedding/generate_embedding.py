@@ -2,34 +2,34 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-from embedding.embedding_extractor import ProteinEmbedder
+from embedding_extractor import ProteinEmbedder
 
 
 # =========================
 # CONFIG
 # =========================
-INPUT_CSV = "data/final_dataset.csv"
+INPUT_CSV = "data/final_dataset_40.csv"
 OUTPUT_DIR = Path("results/embeddings")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-ID_COL = "protein_id"
+ID_COL = "orig_id"
 SEQ_COL = "sequence"
 LABEL_COL = "label"
 
-#MODEL_NAME = "facebook/esm2_t12_650M_UR50D" --> verificar no github
-#MODEL_TYPE = "esm"   # "esm" or "prott5" or later "protbert"
+#MODEL_NAME = "facebook/esm2_t33_650M_UR50D" 
+#MODEL_TYPE = "esm"   
+#BATCH_SIZE = 8
 
 MAX_LENGTH = 1024
 POOLING = "mean"
-#BATCH_SIZE = 8
 
-MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
-MODEL_TYPE = "prott5"
-BATCH_SIZE = 2
+#MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
+#MODEL_TYPE = "prott5"
+#BATCH_SIZE = 2
 
-#MODEL_NAME = "Rostlab/prot_bert"
-#MODEL_TYPE = "protbert"
-#BATCH_SIZE = 4
+MODEL_NAME = "Rostlab/prot_bert"
+MODEL_TYPE = "bert"
+BATCH_SIZE = 4
 
 # =========================
 # LOAD DATA
@@ -66,11 +66,9 @@ print(f"Embedding dimension: {embedder.get_embedding_dim()}")
 # =========================
 # EMBEDDINGS
 # =========================
-embeddings = embedder.embed_batch(
+embeddings = embedder.embed_sequences(
     sequences=df[SEQ_COL].tolist(),
-    max_length=MAX_LENGTH,
-    pooling=POOLING,
-    batch_size=BATCH_SIZE
+    max_length=MAX_LENGTH
 )
 
 print("Embeddings shape:", embeddings.shape)

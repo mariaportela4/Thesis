@@ -43,11 +43,7 @@ class ProteinEmbedder:
             self.model = BertModel.from_pretrained(model_name)
 
         elif self.model_type == "prott5":
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                model_name,
-                do_lower_case=False,
-                use_fast=False,
-            )
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name,use_fast=False,)
             self.model = T5EncoderModel.from_pretrained(
                 model_name,
                 torch_dtype=torch.float32,
@@ -64,10 +60,13 @@ class ProteinEmbedder:
 
         self.model.to(DEVICE)
         self.model.eval()
-
+    
+    def get_embedding_dim(self) -> int:
+        return self.model.config.hidden_size
+    
     @torch.no_grad()
     def embed_sequence(self, seq: str, max_length: int = 1024) -> np.ndarray:
-        if self.model_type in ["protbert", "prott5"]:
+        if self.model_type in ["bert", "prott5"]:
             seq = format_for_protbert_or_prott5(seq)
         else:
             seq = clean_protein_sequence(seq)
