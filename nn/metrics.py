@@ -5,6 +5,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from torch.utils.data import TensorDataset, DataLoader
 
+"""
+Evaluation utilities for the phage depolymerase (DPO) binary classifier.
+
+Provides:
+  - create_eval_loaders  : build PyTorch DataLoaders from pre-split .npy files
+  - evaluate_model       : run inference and return precision/recall/F1 + confusion matrix
+  - plot_training_history_csv : plot train vs. validation loss from a CSV log
+  - create_metrics_table : assemble a tidy DataFrame from a results dictionary
+  - plot_confusion_matrix         : heatmap for a single confusion matrix
+  - plot_all_confusion_matrices   : heatmap for every entry in a results dictionary
+  - compare_embeddings    : rank embedding types by mean metric across models
+  - plot_metric_by_embedding : bar chart of a chosen metric grouped by embedding
+  - plot_metric_by_model     : bar chart of a chosen metric grouped by model architecture
+"""
+
 from sklearn.metrics import (
     precision_score,
     recall_score,

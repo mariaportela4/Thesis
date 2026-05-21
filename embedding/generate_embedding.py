@@ -4,29 +4,55 @@ import numpy as np
 
 from embedding_extractor import ProteinEmbedder
 
+"""
+Batch-embedding pipeline for protein sequences.
+
+Loads a CSV dataset, generates fixed-length numerical embeddings for every
+sequence using a pre-trained transformer model (via ProteinEmbedder), and
+saves the results to disk in two files:
+
+  results/embeddings/<model_type>_embeddings.npy  — NumPy array of shape
+                                                     (n_sequences, hidden_size)
+  results/embeddings/<model_type>_metadata.csv    — sequence IDs (and labels
+                                                     if present) aligned
+                                                     row-for-row with the array
+
+Supported models (uncomment the relevant block in CONFIG to switch):
+  - ProtBERT          (model_type="bert",    Rostlab/prot_bert)
+  - ProtT5-XL         (model_type="prott5",  Rostlab/prot_t5_xl_half_uniref50-enc)
+  - ESM-2 650 M       (model_type="esm",     facebook/esm2_t33_650M_UR50D)
+"""
 
 # =========================
 # CONFIG
 # =========================
-INPUT_CSV = "data/final_dataset_40.csv"
-OUTPUT_DIR = Path("results/embeddings")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+input_csv = "data/final_dataset_40.csv"
+output_dir = Path("results/embeddings")
+output_dir.mkdir(parents=True, exist_ok=True)
 
-ID_COL = "orig_id"
-SEQ_COL = "sequence"
-LABEL_COL = "label"
+# Column names expected in INPUT_CSV
+id_col = "orig_id"  # Unique sequence identifier
+seq_col = "sequence"
+label_col = "label"
 
-#MODEL_NAME = "facebook/esm2_t33_650M_UR50D" 
-#MODEL_TYPE = "esm"   
-#BATCH_SIZE = 8
+max_length = 1024  # Maximum tokenised length; longer sequences are truncated
+pooling = "mean"    # Pooling strategy (currently informational; mean-pool is implemented inside ProteinEmbedder.embed_sequence)
 
-MAX_LENGTH = 1024
-POOLING = "mean"
+# ----- Model selection -----
+# Uncomment exactly ONE block below to choose which model to run.
+# Each block sets MODEL_NAME, MODEL_TYPE, and a suggested BATCH_SIZE.
 
-#MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
-#MODEL_TYPE = "prott5"
-#BATCH_SIZE = 2
+# -- ESM-2 650M  --
+# MODEL_NAME = "facebook/esm2_t33_650M_UR50D"
+# MODEL_TYPE = "esm"
+# BATCH_SIZE = 8
 
+# -- ProtT5-XL  --
+# MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
+# MODEL_TYPE = "prott5"
+# BATCH_SIZE = 2
+
+# -- ProtBERT  --
 MODEL_NAME = "Rostlab/prot_bert"
 MODEL_TYPE = "bert"
 BATCH_SIZE = 4
@@ -34,19 +60,19 @@ BATCH_SIZE = 4
 # =========================
 # LOAD DATA
 # =========================
-df = pd.read_csv(INPUT_CSV)
+df = pd.read_csv(input_csv)
 
-required_cols = [ID_COL, SEQ_COL]
+required_cols = [id_col, seq_col]
 for col in required_cols:
     if col not in df.columns:
         raise ValueError(f"Missing required column: {col}")
 
-print(f"Loaded {len(df)} sequences from {INPUT_CSV}")
+print(f"Loaded {len(df)} sequences from {input_csv}")
 
-# Optional: remove empty sequences
-df = df[df[SEQ_COL].notna()].copy()
-df[SEQ_COL] = df[SEQ_COL].astype(str).str.strip()
-df = df[df[SEQ_COL] != ""].copy()
+# Drop rows with missing or blank sequences; the model cannot process them.
+df = df[df[seq_col].notna()].copy()
+df[seq_col] = df[seq_col].astype(str).str.strip()
+df = df[df[seq_col] != ""].copy()
 
 print(f"Remaining sequences after cleaning empty rows: {len(df)}")
 
@@ -54,6 +80,9 @@ print(f"Remaining sequences after cleaning empty rows: {len(df)}")
 # =========================
 # LOAD MODEL
 # =========================
+# ProteinEmbedder handles tokeniser selection, device placement, and
+# model-specific pre-processing differences internally
+
 embedder = ProteinEmbedder(
     model_name=MODEL_NAME,
     model_type=MODEL_TYPE
@@ -66,26 +95,36 @@ print(f"Embedding dimension: {embedder.get_embedding_dim()}")
 # =========================
 # EMBEDDINGS
 # =========================
+
+# embed_sequences iterates over all sequences and returns a 2-D NumPy array
+# of shape (n_sequences, hidden_size) with one row per input sequence.
+# NOTE: sequences are processed one at a time inside embed_sequences;
+
 embeddings = embedder.embed_sequences(
-    sequences=df[SEQ_COL].tolist(),
-    max_length=MAX_LENGTH
+    sequences = df[seq_col].tolist(),
+    max_length = max_length
 )
 
 print("Embeddings shape:", embeddings.shape)
 
 
 # =========================
-# SAVE NUMPY
+# SAVE OUTPUTS
 # =========================
-np.save(OUTPUT_DIR / f"{MODEL_TYPE}_embeddings.npy", embeddings)
+# --- NumPy array ---
+# Saved as a binary .npy file; load later with np.load(..., allow_pickle=False).
+np.save(output_dir / f"{MODEL_TYPE}_embeddings.npy", embeddings)
 
-# Save metadata separately
-meta_cols = [ID_COL]
-if LABEL_COL in df.columns:
-    meta_cols.append(LABEL_COL)
+# --- Metadata CSV ---
+# Contains the sequence ID and, when available, the class label.
+# Row order matches the embedding array exactly, so row i of the CSV
+# corresponds to row i of the .npy file.
+meta_cols = [id_col]
+if label_col in df.columns:
+    meta_cols.append(label_col)
 
 metadata = df[meta_cols].copy()
-metadata.to_csv(OUTPUT_DIR / f"{MODEL_TYPE}_metadata.csv", index=False)
+metadata.to_csv(output_dir / f"{MODEL_TYPE}_metadata.csv", index=False)
 
-print(f"Saved NPY to: {OUTPUT_DIR / f'{MODEL_TYPE}_embeddings.npy'}")
-print(f"Saved metadata to: {OUTPUT_DIR / f'{MODEL_TYPE}_metadata.csv'}")
+print(f"Saved NPY to: {output_dir / f'{MODEL_TYPE}_embeddings.npy'}")
+print(f"Saved metadata to: {output_dir / f'{MODEL_TYPE}_metadata.csv'}")
