@@ -53,8 +53,9 @@ def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_siz
     return train_loader, val_loader, test_loader
 
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, device, epochs):
+def train_model(model, train_loader, val_loader, criterion, optimizer, device, epochs, model_path):
     history = []
+    best_val_loss = float("inf")
 
     for epoch in range(epochs):
         model.train()
@@ -90,6 +91,11 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
 
         val_loss /= len(val_loader)
 
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            torch.save(model.state_dict(), model_path)
+            print(f"  --> New best model saved (val_loss={val_loss:.4f})")
+
         history.append({
             "epoch": epoch + 1,
             "train_loss": train_loss,
@@ -101,7 +107,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
             f"Train Loss: {train_loss:.4f} | "
             f"Val Loss: {val_loss:.4f}"
         )
-
+    print(f"Best val loss: {best_val_loss:.4f}")
     return history
 
 def main():
@@ -155,21 +161,21 @@ def main():
         weight_decay=args.weight_decay
     )
 
-    history = train_model(
+    os.makedirs("results/models", exist_ok=True)
+    os.makedirs("results/history", exist_ok=True)
+
+    model_path = f"results/models/dnn_{args.embedding}.pt"
+
+    history = train_model (
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
         criterion=criterion,
         optimizer=optimizer,
         device=device,
-        epochs=args.epochs
+        epochs=args.epochs,
+        model_path=model_path
     )
-
-    os.makedirs("results/models", exist_ok=True)
-    os.makedirs("results/history", exist_ok=True)
-
-    model_path = f"results/models/dnn_{args.embedding}.pt"
-    torch.save(model.state_dict(), model_path)
 
     history_df = pd.DataFrame(history)
     history_df.to_csv(

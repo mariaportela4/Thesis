@@ -32,12 +32,12 @@ SLEEP = 0.34  # Seconds to wait between consecutive API calls.
 # ---------- NEGATIVE QUERY ----------
 
 # Searches for viral proteins (taxon 2731619 = Viruses) from RefSeq with 
-# sequence lengths between 250 and 1250 amino acids, then excludes any
+# sequence lengths between 400 and 1250 amino acids, then excludes any
 # sequence whose title or conserved-domain annotation suggests depolymerase
 # activity (lyases, glycanases, hydrolases, etc.).
 
 query = r'''
-(viruses[porgn:txid2731619] AND srcdb_refseq[PROP]) AND (250:1250[SLEN])
+(viruses[porgn:txid2731619] AND srcdb_refseq[PROP]) AND (400:1250[SLEN])
 NOT (lyase*[Title] OR pectate*[Title] OR pectin*[Title] OR depolymerase*[Title]
 OR glycanase*[Title] OR endoglycosidase*[Title] OR alginate*[Title]
 OR rhamnosidase*[Title] OR hyaluronidase*[Title] OR hyaluronate*[Title]

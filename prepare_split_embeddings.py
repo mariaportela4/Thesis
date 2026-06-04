@@ -81,49 +81,51 @@ print("Validation samples:", len(val_idx))
 print("Test samples:", len(test_idx))
 
 # ----------------------------
-# SAVE LABELS
-# ----------------------------
-
-# Labels are saved once, shared across all model families.
-# Row i of y_train.npy corresponds to row i of <model>_train.npy.
-
-np.save(output_dir / "y_train.npy", y_all[train_idx])
-np.save(output_dir / "y_val.npy", y_all[val_idx])
-np.save(output_dir / "y_test.npy", y_all[test_idx])
-
-print("\nSaved label files")
-
-# ----------------------------
 # SPLIT EACH EMBEDDING
 # ----------------------------
+y_saved = False  # only save labels once
+
 for model_name, emb_path in embeddings.items():
     print(f"\nProcessing {model_name}...")
 
     X = np.load(emb_path)
-
     print("Original embedding shape:", X.shape)
 
-    # Guard against shape mismatches that would silently produce wrong splits.
-    # The number of embedding rows must equal the number of dataset rows.
+    meta = pd.read_csv(f"results/embeddings/{model_name}_metadata.csv")
 
-    if X.shape[0] != len(df):
+    # Align embedding rows to match df row order by orig_id
+    merged = df[["orig_id", "split", "label"]].merge(
+    meta[["orig_id"]].reset_index().rename(columns={"index": "emb_idx"}),
+    on="orig_id",
+    how="inner"
+)
+
+    # Guard: all sequences must be matched
+    if len(merged) != len(df):
         raise ValueError(
-            f"{model_name}: mismatch between embeddings and dataset rows"
+            f"{model_name}: only {len(merged)}/{len(df)} sequences matched — check orig_id alignment"
         )
 
-    # Index into the full embedding matrix using the pre-computed split indices.
+    X_aligned = X[merged["emb_idx"].values]
+    y_aligned = merged["label"].map(label_map).values.astype(np.float32)
 
-    X_train = X[train_idx]
-    X_val = X[val_idx]
-    X_test = X[test_idx]
+    train_mask = merged["split"] == "train"
+    val_mask   = merged["split"] == "valid"
+    test_mask  = merged["split"] == "test"
 
-    # Persist each subset under a name that encodes both model and partition.
-    np.save(output_dir / f"{model_name}_train.npy", X_train)
-    np.save(output_dir / f"{model_name}_val.npy", X_val)
-    np.save(output_dir / f"{model_name}_test.npy", X_test)
+    np.save(output_dir / f"{model_name}_train.npy", X_aligned[train_mask])
+    np.save(output_dir / f"{model_name}_val.npy",   X_aligned[val_mask])
+    np.save(output_dir / f"{model_name}_test.npy",  X_aligned[test_mask])
 
-    print(f"{model_name}_train:", X_train.shape)
-    print(f"{model_name}_val:", X_val.shape)
-    print(f"{model_name}_test:", X_test.shape)
+    print(f"{model_name}_train: {X_aligned[train_mask].shape}")
+    print(f"{model_name}_val:   {X_aligned[val_mask].shape}")
+    print(f"{model_name}_test:  {X_aligned[test_mask].shape}")
+
+    # Save labels only once (identical across models after alignment)
+    if not y_saved:
+        np.save(output_dir / "y_train.npy", y_aligned[train_mask])
+        np.save(output_dir / "y_val.npy",   y_aligned[val_mask])
+        np.save(output_dir / "y_test.npy",  y_aligned[test_mask])
+        y_saved = True
 
 print("\nEverything is ready.")

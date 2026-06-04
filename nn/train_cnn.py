@@ -123,7 +123,7 @@ def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_siz
     return train_loader, val_loader, test_loader
 
 # TRAINING LOOP
-def train_model(model, train_loader, val_loader, criterion, optimizer, device, epochs):
+def train_model(model, train_loader, val_loader, criterion, optimizer, device, epochs, model_path):
     """
     Run the full training loop and return per-epoch loss history.
 
@@ -163,6 +163,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
         ``pd.DataFrame(history)``.
     """
     history = []
+    best_val_loss = float("inf")
 
     for epoch in range(epochs):
         # Training phase
@@ -202,6 +203,12 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
 
         val_loss /= len(val_loader)
 
+        # Save best checkpoint
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            torch.save(model.state_dict(), model_path)
+            print(f"  --> New best model saved (val_loss={val_loss:.4f})")
+
         history.append({
             "epoch": epoch + 1,            # 1-indexed for readability in logs
             "train_loss": train_loss,
@@ -213,6 +220,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
             f"Train Loss: {train_loss:.4f} | "
             f"Val Loss: {val_loss:.4f}"
         )
+    print(f"Best val loss: {best_val_loss:.4f}")
 
     return history
 
@@ -290,6 +298,13 @@ def main():
         weight_decay=args.weight_decay
     )
 
+    # --- Save outputs ---
+    os.makedirs("results/models", exist_ok=True)
+    os.makedirs("results/history", exist_ok=True)
+
+    # Model weights only (state_dict); use CNNClassifier(input_dim)
+    model_path = f"results/models/cnn_{args.embedding}.pt"
+
     # --- Train ---
     history = train_model(
         model=model,
@@ -298,16 +313,10 @@ def main():
         criterion=criterion,
         optimizer=optimizer,
         device=device,
-        epochs=args.epochs
+        epochs=args.epochs,
+        model_path=model_path
     )
 
-    # --- Save outputs ---
-    os.makedirs("results/models", exist_ok=True)
-    os.makedirs("results/history", exist_ok=True)
-
-    # Model weights only (state_dict); use CNNClassifier(input_dim) + load_state_dict to reload
-    model_path = f"results/models/cnn_{args.embedding}.pt"
-    torch.save(model.state_dict(), model_path)
 
     # Loss history — one row per epoch, columns: epoch / train_loss / val_loss
     history_df = pd.DataFrame(history)

@@ -43,19 +43,19 @@ pooling = "mean"    # Pooling strategy (currently informational; mean-pool is im
 # Each block sets MODEL_NAME, MODEL_TYPE, and a suggested BATCH_SIZE.
 
 # -- ESM-2 650M  --
-# MODEL_NAME = "facebook/esm2_t33_650M_UR50D"
-# MODEL_TYPE = "esm"
-# BATCH_SIZE = 8
+#MODEL_NAME = "facebook/esm2_t33_650M_UR50D"
+#MODEL_TYPE = "esm"
+#BATCH_SIZE = 8
 
 # -- ProtT5-XL  --
-# MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
-# MODEL_TYPE = "prott5"
-# BATCH_SIZE = 2
+MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
+MODEL_TYPE = "prott5"
+BATCH_SIZE = 2
 
 # -- ProtBERT  --
-MODEL_NAME = "Rostlab/prot_bert"
-MODEL_TYPE = "bert"
-BATCH_SIZE = 4
+#MODEL_NAME = "Rostlab/prot_bert"
+#MODEL_TYPE = "bert"
+#BATCH_SIZE = 4
 
 # =========================
 # LOAD DATA
