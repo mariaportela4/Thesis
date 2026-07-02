@@ -20,3 +20,5 @@ Thumbs.db
 .vscode/
 Miniconda3-latest-MacOSX-arm64.sh
 Depolymerase-Predictor/
+deposcope_weights/
+results/deposcope_retrain/esm2_token_features.npz

@@ -152,14 +152,6 @@ def plot_confusion_matrix(cm, title="Confusion Matrix"):
     plt.show()
 
 
-def plot_all_confusion_matrices(results_dict):
-    for name, result in results_dict.items():
-        plot_confusion_matrix(
-            result["cm"],
-            title=f"Confusion Matrix: {name}"
-        )
-
-
 def compare_embeddings(metrics_df):
     embedding_comparison = (
         metrics_df
