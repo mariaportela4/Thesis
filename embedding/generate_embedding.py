@@ -48,14 +48,14 @@ pooling = "mean"    # Pooling strategy (currently informational; mean-pool is im
 #BATCH_SIZE = 8
 
 # -- ProtT5-XL  --
-MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
-MODEL_TYPE = "prott5"
-BATCH_SIZE = 2
+#MODEL_NAME = "Rostlab/prot_t5_xl_half_uniref50-enc"
+#MODEL_TYPE = "prott5"
+#BATCH_SIZE = 2
 
 # -- ProtBERT  --
-#MODEL_NAME = "Rostlab/prot_bert"
-#MODEL_TYPE = "bert"
-#BATCH_SIZE = 4
+MODEL_NAME = "Rostlab/prot_bert"
+MODEL_TYPE = "bert"
+BATCH_SIZE = 4
 
 # =========================
 # LOAD DATA
