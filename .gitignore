@@ -24,3 +24,5 @@ deposcope_weights/
 results/deposcope_retrain/esm2_token_features.npz
 logs/
 needleall.error
+Miniconda3-latest-MacOSX-arm64.sh
+needleall.error
