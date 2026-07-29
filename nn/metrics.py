@@ -163,24 +163,6 @@ def compare_embeddings(metrics_df):
     return embedding_comparison
 
 
-def plot_metric_by_embedding(metrics_df, metric="mcc"):
-    plt.figure(figsize=(7, 5))
-
-    sns.barplot(
-        data=metrics_df,
-        x="embedding",
-        y=metric,
-        errorbar=None
-    )
-
-    plt.xlabel("Embedding")
-    plt.ylabel(metric.upper())
-    plt.title(f"Mean {metric.upper()} by Embedding Type")
-
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_metric_by_model(metrics_df, metric="mcc"):
     plt.figure(figsize=(7, 5))
 
