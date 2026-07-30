@@ -111,10 +111,8 @@ for name, arch, embedding in model_configs:
     preds = (probs >= 0.5).astype(int)
     
     cm = confusion_matrix(y_true, preds)
-    plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}")
     cm_path = OUTPUT_DIR / f"confusion_matrix_{name}.png"
-    plt.savefig(cm_path, dpi=200, bbox_inches="tight")
-    plt.close()
+    plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}", show=False, save_path=cm_path)
     print(f"[+] Confusion matrix saved to {cm_path}")
     results[name] = {
         "f1": f1_score(y_true, preds),
@@ -253,8 +251,6 @@ plt.close()
 # ----------------------------
 for name in ["deposcope_retrained", "depp_retrained"]:
     cm = confusion_matrix(y_true, results[name]["preds"])
-    plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}")
     cm_path = OUTPUT_DIR / f"confusion_matrix_{name}.png"
-    plt.savefig(cm_path, dpi=200, bbox_inches="tight")
-    plt.close()
+    plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}")
     print(f"[+] Confusion matrix saved to {cm_path}")
