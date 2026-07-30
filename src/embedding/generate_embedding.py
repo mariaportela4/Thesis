@@ -1,4 +1,5 @@
 from pathlib import Path
+from Bio import SeqIO
 import pandas as pd
 import numpy as np
 
@@ -60,22 +61,42 @@ BATCH_SIZE = 4
 # =========================
 # LOAD DATA
 # =========================
+
+fasta_path = "data/merged_input_normalized.fasta"
+
 df = pd.read_csv(input_csv)
 
-required_cols = [id_col, seq_col]
+required_cols = [id_col]
 for col in required_cols:
     if col not in df.columns:
         raise ValueError(f"Missing required column: {col}")
 
 print(f"Loaded {len(df)} sequences from {input_csv}")
 
-# Drop rows with missing or blank sequences; the model cannot process them.
-df = df[df[seq_col].notna()].copy()
+# Load sequences from the normalized FASTA, keyed by orig_id (parsed from header)
+seqs_by_orig_id = {}
+for rec in SeqIO.parse(fasta_path, "fasta"):
+    header_parts = dict(p.split('=', 1) for p in rec.id.split('|')[1:] if '=' in p)
+    oid = header_parts.get('orig_id')
+    if oid:
+        seqs_by_orig_id[oid] = str(rec.seq)
+
+print(f"Loaded {len(seqs_by_orig_id)} sequences from {fasta_path}")
+
+df[seq_col] = df[id_col].map(seqs_by_orig_id)
+
+# Guard: every row in the CSV must find a matching sequence in the FASTA
+missing = df[seq_col].isna().sum()
+if missing:
+    raise ValueError(
+        f"{missing} rows in {input_csv} have no matching sequence in {fasta_path} — "
+        f"check orig_id alignment between the two files"
+    )
+
 df[seq_col] = df[seq_col].astype(str).str.strip()
 df = df[df[seq_col] != ""].copy()
 
 print(f"Remaining sequences after cleaning empty rows: {len(df)}")
-
 
 # =========================
 # LOAD MODEL

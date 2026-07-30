@@ -41,27 +41,28 @@ def clean_protein_sequence(seq: str) -> str:
     """
     Sanitise a raw protein sequence for use with transformer models.
 
-    Steps performed:
-      1. Convert to upper-case and strip leading/trailing whitespace.
-      2. Remove any character that is not a valid IUPAC amino-acid letter
-         (standard 20 + ambiguous codes U, Z, O, B, X).
-      3. Replace ambiguous / non-standard residues (U, Z, O, B) with 'X',
-         the generic unknown-residue token recognised by all supported models.
+    Assumes ambiguous residues (B, Z, J, U, O) have already been normalised
+    to 'X' upstream by normalize_ambiguous_aa.py. This function only strips
+    whitespace/case and validates the sequence contains no unexpected
+    characters — it does not perform ambiguous-residue normalisation itself,
+    to avoid a second, divergent implementation of that logic.
 
-    Parameters
-    ----------
-    seq : str
-        Raw protein sequence string (any case, may contain gaps or digits).
-
-    Returns
-    -------
-    str
-        Cleaned sequence containing only uppercase IUPAC amino-acid letters,
-        with ambiguous residues normalised to 'X'.
+    Raises
+    ------
+    ValueError
+        If the sequence still contains raw ambiguous codes (B, Z, J, U, O),
+        which signals that the input FASTA was not normalised upstream.
     """
     seq = seq.upper().strip()
-    seq = re.sub(r"[^ACDEFGHIKLMNPQRSTVWYUZOBX]", "", seq)  # Drop invalid chars
-    seq = re.sub(r"[UZOB]", "X", seq)                       # Normalise ambiguous residues
+
+    still_ambiguous = set('BZJUO') & set(seq)
+    if still_ambiguous:
+        raise ValueError(
+            f"Sequence contains un-normalised ambiguous residues {still_ambiguous} — "
+            f"expected input to already be normalised via normalize_ambiguous_aa.py"
+        )
+
+    seq = re.sub(r"[^ACDEFGHIKLMNPQRSTVWYX]", "", seq)  # drop anything not a valid IUPAC letter or X
     return seq
 
 
