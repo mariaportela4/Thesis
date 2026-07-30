@@ -47,7 +47,7 @@ class DNNClassifier(nn.Module):
         The full feed-forward stack from input to output logit.
     """
      
-    def __init__(self, input_dim):
+    def __init__(self, input_dim, dropout1=0.4, dropout2=0.3, dropout3=0.2):
         super(DNNClassifier, self).__init__()
 
         self.model = nn.Sequential(
@@ -58,7 +58,7 @@ class DNNClassifier(nn.Module):
                 nn.Linear(input_dim, 512),
                 nn.BatchNorm1d(512),
                 nn.ReLU(),
-                nn.Dropout(0.4),
+                nn.Dropout(dropout1),
 
                 # --- Hidden layer 2 ---
                 # Halves the representation width; BatchNorm continues to
@@ -66,14 +66,14 @@ class DNNClassifier(nn.Module):
                 nn.Linear(512, 256),
                 nn.BatchNorm1d(256),
                 nn.ReLU(),
-                nn.Dropout(0.3),
+                nn.Dropout(dropout2),
 
                 # --- Hidden layer 3 ---
                 # Further compression to 64 units. BatchNorm is omitted here;
                 # the small width makes it less beneficial. Dropout reduced to 0.2.
                 nn.Linear(256, 64),
                 nn.ReLU(),
-                nn.Dropout(0.2),
+                nn.Dropout(dropout3),
 
                 # --- Output layer ---
                 # Projects to a single unbounded logit; no activation applied.

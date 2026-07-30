@@ -60,7 +60,7 @@ class CNNClassifier(nn.Module):
         → Linear(64→1).
     """
 
-    def __init__(self, input_dim):
+    def __init__(self, input_dim,  dropout=0.3):
         super(CNNClassifier, self).__init__()
 
         # --- Convolutional block 1 ---
@@ -88,7 +88,7 @@ class CNNClassifier(nn.Module):
         self.classifier = nn.Sequential(
             nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(dropout),
             nn.Linear(64, 1)
         )
 
@@ -126,3 +126,4 @@ class CNNClassifier(nn.Module):
 
         # FC head: (B, 128) → (B, 1)
         return self.classifier(x)
+    
