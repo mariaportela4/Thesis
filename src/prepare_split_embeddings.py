@@ -62,24 +62,6 @@ print(df["label"].value_counts())
 
 label_map = { "negative": 0, "positive": 1}
 
-y_all = df["label"].map(label_map).values.astype(np.float32)
-
-# ----------------------------
-# SPLIT INDICES
-# ----------------------------
-
-# Derive integer positional indices for each partition from the 'split' column.
-# Using the DataFrame index (not row numbers) keeps alignment correct even if
-# the CSV is not zero-indexed or contains gaps.
-
-train_idx = df[df["split"] == "train"].index
-val_idx = df[df["split"] == "valid"].index
-test_idx = df[df["split"] == "test"].index
-
-print("\nTrain samples:", len(train_idx))
-print("Validation samples:", len(val_idx))
-print("Test samples:", len(test_idx))
-
 # ----------------------------
 # SPLIT EACH EMBEDDING
 # ----------------------------
@@ -121,11 +103,18 @@ for model_name, emb_path in embeddings.items():
     print(f"{model_name}_val:   {X_aligned[val_mask].shape}")
     print(f"{model_name}_test:  {X_aligned[test_mask].shape}")
 
-    # Save labels only once (identical across models after alignment)
     if not y_saved:
         np.save(output_dir / "y_train.npy", y_aligned[train_mask])
         np.save(output_dir / "y_val.npy",   y_aligned[val_mask])
         np.save(output_dir / "y_test.npy",  y_aligned[test_mask])
         y_saved = True
+        y_train_ref = y_aligned[train_mask]
+        y_val_ref   = y_aligned[val_mask]
+        y_test_ref  = y_aligned[test_mask]
+    else:
+        assert np.array_equal(y_aligned[train_mask], y_train_ref), f"{model_name}: train labels mismatch vs reference — alignment inconsistency"
+        assert np.array_equal(y_aligned[val_mask], y_val_ref), f"{model_name}: val labels mismatch vs reference"
+        assert np.array_equal(y_aligned[test_mask], y_test_ref), f"{model_name}: test labels mismatch vs reference"
+
 
 print("\nEverything is ready.")

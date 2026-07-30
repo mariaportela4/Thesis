@@ -132,7 +132,7 @@ def create_metrics_table(results_dict):
     return df
 
 
-def plot_confusion_matrix(cm, title="Confusion Matrix"):
+def plot_confusion_matrix(cm, title="Confusion Matrix", show = True, save_path = None):
     plt.figure(figsize=(5, 4))
 
     sns.heatmap(
@@ -149,17 +149,24 @@ def plot_confusion_matrix(cm, title="Confusion Matrix"):
     plt.title(title)
 
     plt.tight_layout()
-    plt.show()
+
+    if save_path is not None:
+        plt.savefig(save_path, dpi=200, bbox_inches="tight")
+
+    if show:
+        plt.show()
+    else:
+        plt.close()
 
 
-def compare_embeddings(metrics_df):
+
+def compare_embeddings(metrics_df, sort_by="f1_score"):
     embedding_comparison = (
         metrics_df
         .groupby("embedding")[["precision", "recall", "f1_score"]]
         .mean()
-        .sort_values(by="mcc", ascending=False)
+        .sort_values(by=sort_by, ascending=False)
     )
-
     return embedding_comparison
 
 
