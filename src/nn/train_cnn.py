@@ -270,7 +270,7 @@ def main():
     print("Validation:", X_val.shape, y_val.shape)
     print("Test:", X_test.shape, y_test.shape)
      # --- Build DataLoaders ---
-    train_loader, val_loader, test_loader = create_dataloaders(
+    train_loader, val_loader, _ = create_dataloaders(
         X_train,
         X_val,
         X_test,
