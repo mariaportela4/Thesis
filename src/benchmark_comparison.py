@@ -3,6 +3,7 @@ Benchmark comparison across:
   - The 6 thesis models (cnn/dnn x esm/bert/prott5)
   - DepoScope, retrained on the thesis training set
   - DePP, retrained on the thesis training set
+  - PhageDPO, retrained on the thesis training set
 
 All evaluated on the same test split (final_dataset_40.csv, split == 'test').
 
@@ -39,6 +40,7 @@ SPLIT_DIR = Path("results/embeddings/split")
 MODELS_DIR = Path("results/models")
 DEPOSCOPE_DIR = Path("results/deposcope_retrain")
 DEPP_DIR = Path("results/depp_retrain")
+PHAGEDPO_DIR = Path("results/phagedpo_retrain")
 OUTPUT_DIR = Path("results")
 
 EMBEDDING_DIMS = {
@@ -175,7 +177,38 @@ print(f"[+] depp_retrained: F1={results['depp_retrained']['f1']:.4f}  "
 
 
 # ----------------------------
-# 5. Assemble metrics table
+# 5. PhageDPO retrained — merge by orig_id (robust to ordering AND to the
+#    ambiguous-AA sequences that phagedpo_retrain.py drops before featurizing;
+#    the test set is currently confirmed free of these, but the merge stays
+#    correct either way instead of silently assuming positional alignment)
+# ----------------------------
+phagedpo_df = pd.read_csv(PHAGEDPO_DIR / "phagedpo_retrained_predictions.csv")
+
+merged_phagedpo = test_df[["orig_id", "label"]].merge(phagedpo_df, on="orig_id", how="left")
+if merged_phagedpo["Probability_DPO"].isna().any():
+    missing = merged_phagedpo[merged_phagedpo["Probability_DPO"].isna()]
+    raise ValueError(f"{len(missing)} test sequences missing from PhageDPO predictions "
+                      f"(likely dropped for containing a non-standard amino acid): "
+                      f"{missing['orig_id'].tolist()[:5]}")
+
+phagedpo_probs = merged_phagedpo["Probability_DPO"].values
+phagedpo_preds = (phagedpo_probs >= 0.5).astype(int)
+
+results["phagedpo_retrained"] = {
+    "f1": f1_score(y_true, phagedpo_preds),
+    "precision": precision_score(y_true, phagedpo_preds),
+    "recall": recall_score(y_true, phagedpo_preds),
+    "auc": roc_auc_score(y_true, phagedpo_probs),
+    "accuracy": accuracy_score(y_true, phagedpo_preds),
+    "probs": phagedpo_probs,
+    "preds": phagedpo_preds,
+}
+print(f"[+] phagedpo_retrained: F1={results['phagedpo_retrained']['f1']:.4f}  "
+      f"AUC={results['phagedpo_retrained']['auc']:.4f}")
+
+
+# ----------------------------
+# 6. Assemble metrics table
 # ----------------------------
 metrics_df = pd.DataFrame([
     {
@@ -195,9 +228,9 @@ print(metrics_df.to_string(index=False))
 
 
 # ----------------------------
-# 6. Bar plot: Precision, Recall, F1 (as previously requested by the supervisor)
+# 7. Bar plot: Precision, Recall, F1 (as previously requested by the supervisor)
 # ----------------------------
-EXTERNAL_TOOLS = {"deposcope_retrained", "depp_retrained"}
+EXTERNAL_TOOLS = {"deposcope_retrained", "depp_retrained", "phagedpo_retrained"}
 
 # Order: thesis models first (by F1, already sorted in metrics_df), then external tools
 thesis_rows = metrics_df[~metrics_df["model"].isin(EXTERNAL_TOOLS)]
@@ -233,7 +266,7 @@ ax.set_xticks(x)
 ax.set_xticklabels(plot_df.index, rotation=40, ha="right")
 ax.set_ylabel("Score")
 ax.set_ylim(0, 1.12)
-ax.set_title("Benchmark comparison: thesis models vs. retrained DepoScope and DePP", pad=28)
+ax.set_title("Benchmark comparison: thesis models vs. retrained DepoScope, DePP and PhageDPO", pad=28)
 ax.legend(title="Metric", loc="lower right", framealpha=0.9)
 ax.yaxis.grid(True, linestyle=":", alpha=0.5)
 ax.set_axisbelow(True)
@@ -247,10 +280,12 @@ plt.close()
 
 
 # ----------------------------
-# 7. Confusion matrices for the two retrained external tools
+# 8. Confusion matrices for the three retrained external tools
 # ----------------------------
-for name in ["deposcope_retrained", "depp_retrained"]:
+for name in ["deposcope_retrained", "depp_retrained", "phagedpo_retrained"]:
     cm = confusion_matrix(y_true, results[name]["preds"])
     cm_path = OUTPUT_DIR / f"confusion_matrix_{name}.png"
-    plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}")
+    plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}", show=False, save_path=cm_path)
     print(f"[+] Confusion matrix saved to {cm_path}")
+
+   

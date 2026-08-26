@@ -17,10 +17,8 @@ Pipeline:
   6. Save model + metrics to results/deposcope_retrain/
 
 Usage:
-    conda activate thesis_env
-    python deposcope_retrain.py
+    python src/deposcope_retrain.py
 
-Author: adapted for Maria's thesis, June 2026
 """
 
 import os
@@ -183,14 +181,29 @@ def get_or_compute_features(df: pd.DataFrame,
     Load pre-computed features from cache, or compute and cache them.
     Returns dict with keys 'train', 'test' mapping to feature arrays.
     """
+    train_df = df[df["split"] == "train"]
+    test_df  = df[df["split"] == "test"]
+
     if FEATURE_CACHE.exists():
         print(f"Loading cached ESM-2 features from {FEATURE_CACHE}")
         data = np.load(FEATURE_CACHE)
-        return {"train": data["train"], "test": data["test"]}
+        cached_train, cached_test = data["train"], data["test"]
+
+        # Guard against stale caches: if final_dataset_40.csv was regenerated
+        # or edited after the cache was written, array lengths silently drift
+        # out of sync with train_df/test_df and corrupt downstream indexing.
+        if len(cached_train) != len(train_df) or len(cached_test) != len(test_df):
+            raise RuntimeError(
+                f"Stale feature cache detected at {FEATURE_CACHE}: "
+                f"cache has train={len(cached_train)}, test={len(cached_test)}, "
+                f"but {DATA_CSV.name} currently has train={len(train_df)}, "
+                f"test={len(test_df)}. Delete the cache file and re-run to "
+                f"recompute features against the current split, or confirm "
+                f"which version of {DATA_CSV.name} is authoritative."
+            )
+        return {"train": cached_train, "test": cached_test}
 
     print("Pre-computing ESM-2 token features (this runs once and is cached)...")
-    train_df = df[df["split"] == "train"]
-    test_df  = df[df["split"] == "test"]
 
     train_feats = compute_esm2_features(train_df["sequence"].tolist(), tokenizer, esm2_model)
     test_feats  = compute_esm2_features(test_df["sequence"].tolist(),  tokenizer, esm2_model)
@@ -299,6 +312,15 @@ def main():
     test_labels  = (test_df["label"] == "positive").astype(np.float32).values
 
     # ── 5. DataLoaders ───────────────────────────────────────
+    assert len(train_feats) == len(train_labels), (
+        f"train_feats ({len(train_feats)}) and train_labels ({len(train_labels)}) "
+        f"length mismatch — feature cache is out of sync with the current split."
+    )
+    assert len(test_feats) == len(test_labels), (
+        f"test_feats ({len(test_feats)}) and test_labels ({len(test_labels)}) "
+        f"length mismatch — feature cache is out of sync with the current split."
+    )
+
     # Use 10% of train as validation for early stopping
     n_val       = max(1, int(0.1 * len(train_feats)))
     val_feats   = train_feats[-n_val:]

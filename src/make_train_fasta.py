@@ -8,11 +8,11 @@ normalize_ambiguous_aa.py. This script assumes its --merged-fasta input is
 already normalized, and no longer drops any sequences.
 
 Usage:
-    python make_train_fasta.py \
+    python src/make_train_fasta.py \
         --merged-fasta data/merged_input_normalized.fasta \
         --dataset-csv data/final_dataset_40.csv \
         --output data/train_sequences_clean.fasta \
-        --split train
+        --split test
 """
 
 import argparse
@@ -27,6 +27,7 @@ def main():
     parser.add_argument('--dataset-csv', required=True)
     parser.add_argument('--output', required=True)
     parser.add_argument('--split', default='train', help="value of the 'split' column to filter on (default: train)")
+    #parser.add_argument('--split', default='test', help="value of the 'split' column to filter on (default: test)")
     args = parser.parse_args()
 
     df = pd.read_csv(args.dataset_csv)

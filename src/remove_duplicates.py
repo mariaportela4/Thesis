@@ -25,7 +25,7 @@ def classify_id(rec_id : str) -> str:
 
     if rec_id.startswith('pdb|'):
         return 'pdb'
-    if rec_id.startswith('refseq_prefixes'):
+    if rec_id.startswith(refseq_prefixes):
         return 'refseq'
     return 'genbank'
 

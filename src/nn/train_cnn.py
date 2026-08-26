@@ -1,6 +1,7 @@
 from cnn import CNNClassifier
 
 import os
+import json
 import argparse
 import numpy as np
 import pandas as pd
@@ -17,11 +18,23 @@ Loads pre-split protein embedding arrays, trains the model with
 BCEWithLogitsLoss and Adam optimisation, and saves the trained weights
 and per-epoch loss history to disk.
 
+Hyperparameters (lr, batch_size, weight_decay, dropout) are loaded
+automatically from results/tuning/cnn_<embedding>_best_params.json,
+if that file exists (produced by tune_hyperparams.py). Any value passed
+explicitly on the command line overrides the tuned one for that run only.
+
 Usage
 -----
-    python train_cnn.py --embedding esm
-    python train_cnn.py --embedding bert   --epochs 100 --lr 5e-4
-    python train_cnn.py --embedding prott5 --batch_size 16 --weight_decay 1e-4
+    python src/nn/train_cnn.py --embedding esm
+        # uses results/tuning/cnn_esm_best_params.json if present,
+        # otherwise falls back to the architecture defaults below.
+
+    python src/nn/train_cnn.py --embedding bert --lr 5e-4
+        # same, but overrides just the learning rate for this run.
+
+    python src/nn/train_cnn.py --embedding prott5 --no-tuned-params
+        # ignores any tuned params file and uses the architecture
+        # defaults (lr=1e-3, batch_size=32, weight_decay=1e-5, dropout=0.3).
 
 Outputs
 -------
@@ -121,6 +134,34 @@ def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_siz
     )
 
     return train_loader, val_loader, test_loader
+
+# HYPERPARAMETER LOADING
+def load_best_params(arch, embedding, tuning_dir="results/tuning"):
+    """
+    Load the best hyperparameters found by tune_hyperparams.py for a given
+    (arch, embedding) combination, if the file exists.
+
+    Parameters
+    ----------
+    arch : str
+        "cnn" or "dnn" — used to build the expected filename.
+    embedding : str
+        "esm", "bert", or "prott5".
+    tuning_dir : str
+        Directory where tune_hyperparams.py writes its output.
+
+    Returns
+    -------
+    dict or None
+        The "best_params" dict (lr, batch_size, weight_decay, dropout, ...)
+        if the file exists, otherwise None.
+    """
+    path = f"{tuning_dir}/{arch}_{embedding}_best_params.json"
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        data = json.load(f)
+    return data["best_params"]
 
 # TRAINING LOOP
 def train_model(model, train_loader, val_loader, criterion, optimizer, device, epochs, model_path):
@@ -255,13 +296,52 @@ def main():
     )
 
     parser.add_argument("--epochs", type=int, default=50)
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--weight_decay", type=float, default=1e-5)
+    # Hyperparameters default to None so we can tell "not passed by user"
+    # apart from "explicitly set" -- lets tuned values fill the gaps below.
+    parser.add_argument("--batch_size", type=int, default=None)
+    parser.add_argument("--lr", type=float, default=None)
+    parser.add_argument("--weight_decay", type=float, default=None)
+    parser.add_argument("--dropout", type=float, default=None)
+    parser.add_argument(
+        "--no-tuned-params",
+        action="store_true",
+        help="Ignore results/tuning/cnn_<embedding>_best_params.json even if present, "
+             "and fall back to the architecture defaults."
+    )
 
     args = parser.parse_args()
 
     print(f"Training CNN using {args.embedding} embeddings")
+
+    # --- Resolve hyperparameters: tuned JSON < CLI override < hardcoded defaults ---
+    ARCH_DEFAULTS = {"lr": 1e-3, "batch_size": 32, "weight_decay": 1e-5, "dropout": 0.3}
+
+    best_params = None if args.no_tuned_params else load_best_params("cnn", args.embedding)
+    if best_params is not None:
+        print(f"[+] Loaded tuned hyperparameters from "
+              f"results/tuning/cnn_{args.embedding}_best_params.json: {best_params}")
+    else:
+        print("[!] No tuned hyperparameters found (or --no-tuned-params set) -- "
+              "using architecture defaults / CLI values only.")
+
+    def resolve(name):
+        # 1. Explicit CLI value always wins
+        cli_val = getattr(args, name)
+        if cli_val is not None:
+            return cli_val
+        # 2. Otherwise use the tuned value, if available
+        if best_params is not None and name in best_params:
+            return best_params[name]
+        # 3. Fall back to the architecture default
+        return ARCH_DEFAULTS[name]
+
+    args.lr = resolve("lr")
+    args.batch_size = resolve("batch_size")
+    args.weight_decay = resolve("weight_decay")
+    args.dropout = resolve("dropout")
+
+    print(f"[+] Final hyperparameters -- lr={args.lr}, batch_size={args.batch_size}, "
+          f"weight_decay={args.weight_decay}, dropout={args.dropout}")
 
     # --- Load data ---
     X_train, X_val, X_test, y_train, y_val, y_test = load_data(args.embedding)
@@ -286,7 +366,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
-    model = CNNClassifier(input_dim=input_dim).to(device)
+    model = CNNClassifier(input_dim=input_dim, dropout=args.dropout).to(device)
 
     # BCEWithLogitsLoss fuses sigmoid + BCE in a single numerically stable op
     criterion = nn.BCEWithLogitsLoss()

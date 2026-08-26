@@ -1,0 +1,7 @@
+{
+  "best_cv_mcc": 0.8384988877659163,
+  "clf__C": 1.0,
+  "clf__gamma": "scale",
+  "clf__kernel": "rbf",
+  "selector__k": 573
+}
