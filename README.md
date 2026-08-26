@@ -36,16 +36,5 @@ A parallel run was also done at 60% GraphPart identity for comparison, but **onl
 - External tool weights/repos (`deposcope_weights/`, `Depolymerase-Predictor/`) and feature caches are gitignored — see individual READMEs for how they're regenerated.
 
 ## Pending (post re-run)
-
-- Steps 3–7 above reflect the pipeline as it will run after moving ambiguous-residue normalization earlier (before CD-HIT). The current `final_dataset_40.csv` split assignments were generated from CD-HIT and GraphPart runs on **non-normalized** sequences — both steps need to be re-run against the normalized input before results are consistent with this documented order.
-- Downstream of the split, the following also need to be regenerated once normalized CD-HIT/GraphPart output is available:
-  - Protein language model embeddings (`src/embedding/generate_embedding.py`) — whether all three embeddings actually change depends on whether any training sequences contain the residue `J` specifically (the previous embedding extraction already normalized B/Z/J/U/O → X, except J, which was silently dropped rather than replaced — see note in `src/embedding/README.md`)
-  - `data/train_sequences_clean.fasta` / `test_sequences_clean.fasta` (`src/make_train_fasta.py`) — previously 1502/178 for DePP/DepoScope (11 training sequences dropped due to ambiguous residues); expected 1513/178 after normalization, matching the thesis models' split counts
-  - The six thesis models (DNN/CNN × ESM-2/ProtBERT/ProtT5) — retraining required only if the embeddings actually change (see above)
-  - DepoScope and DePP retraining (`src/deposcope_retrain.py`, `depp_retrain.py`) — retraining required regardless, since their training set gains 11 sequences
-  - `results/benchmark_metrics.csv` and associated plots (`src/benchmark_comparison.py`) — final step, once all of the above are regenerated
-- Hyperparameter tuning (`src/nn/tune_hyperparams.py`) has not yet been run to completion for all six thesis models — `results/tuning/` will be populated after that step.
-- `src/datasets/ncbi_fetch.py` needs adjustments to produce a better-balanced positive/negative dataset upstream of CD-HIT (currently a large imbalance, e.g. ~500 positives vs. ~16000 negatives before CD-HIT).
 - Additional result visualisations to add: heatmap, dot plot, and/or spider (radar) chart, alongside the existing bar plot in `results/benchmark_barplot.png`.
 - Compute mean ± standard deviation across metrics by retraining the six thesis models with multiple random seeds (feasible only for the six thesis models, not for the retrained external tools).
-- Benchmark against PhageDPO itself (the framework this thesis builds on), in addition to the current DepoScope/DePP comparison.
