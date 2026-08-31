@@ -34,7 +34,3 @@ A parallel run was also done at 60% GraphPart identity for comparison, but **onl
 
 ## Notes for anyone reading this repo
 - External tool weights/repos (`deposcope_weights/`, `Depolymerase-Predictor/`) and feature caches are gitignored — see individual READMEs for how they're regenerated.
-
-## Pending (post re-run)
-- Additional result visualisations to add: heatmap, dot plot, and/or spider (radar) chart, alongside the existing bar plot in `results/benchmark_barplot.png`.
-- Compute mean ± standard deviation across metrics by retraining the six thesis models with multiple random seeds (feasible only for the six thesis models, not for the retrained external tools).
