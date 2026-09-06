@@ -1,12 +1,18 @@
 """
 deposcope_retrain.py
 ====================
-Retrains DepoScope's CNN classifier (Component 2) on your dataset,
+Retrains DepoScope's  CNN classifier (Component 2) on our own dataset,
 keeping the fine-tuned ESM-2 (Component 1) frozen as a feature extractor.
+
+Source: https://github.com/dimiboeckaerts/DepoScope
+Paper:  Concha-Eloko R, Stock M, De Baets B, Briers Y, Sanjuán R, Domingo-Calap P, Boeckaerts D. 
+        DepoScope: Accurate phage depolymerase annotation and domain delineation using large language models. 
+        PLoS Comput Biol. 2024 Aug 5;20(8):e1011831. doi: 10.1371/journal.pcbi.1011831.
+
 
 Architecture (from DepoScope source):
   - ESM-2 (esm2_t12_35M, fine-tuned for token classification) → frozen
-  - Dpo_classifier CNN head → trained on your data
+  - Dpo_classifier CNN head → trained on our data
 
 Pipeline:
   1. Download DepoScope weights from Zenodo (if not present)
@@ -183,32 +189,41 @@ def get_or_compute_features(df: pd.DataFrame,
     """
     train_df = df[df["split"] == "train"]
     test_df  = df[df["split"] == "test"]
-
     if FEATURE_CACHE.exists():
         print(f"Loading cached ESM-2 features from {FEATURE_CACHE}")
         data = np.load(FEATURE_CACHE)
         cached_train, cached_test = data["train"], data["test"]
 
-        # Guard against stale caches: if final_dataset_40.csv was regenerated
-        # or edited after the cache was written, array lengths silently drift
-        # out of sync with train_df/test_df and corrupt downstream indexing.
-        if len(cached_train) != len(train_df) or len(cached_test) != len(test_df):
+        # Guard against stale caches: if final_dataset_40.csv was regenerated,
+        # the split sizes stay the same (1515/176) while the sequences behind
+        # them change, so comparing lengths detects nothing. Compare identities.
+        cached_train_ids = [str(x) for x in data["train_ids"]] if "train_ids" in data else None
+        cached_test_ids = cached_test_ids = [str(x) for x in data["test_ids"]] if "test_ids" in data else None
+
+
+        if (cached_train_ids != [str(x) for x in train_df["seq_id"]]
+                or cached_test_ids != [str(x) for x in test_df["seq_id"]]):
             raise RuntimeError(
-                f"Stale feature cache detected at {FEATURE_CACHE}: "
-                f"cache has train={len(cached_train)}, test={len(cached_test)}, "
-                f"but {DATA_CSV.name} currently has train={len(train_df)}, "
-                f"test={len(test_df)}. Delete the cache file and re-run to "
-                f"recompute features against the current split, or confirm "
-                f"which version of {DATA_CSV.name} is authoritative."
+                f"Stale feature cache detected at {FEATURE_CACHE}: the cached "
+                f"sequence IDs do not match the current {DATA_CSV.name}. The "
+                f"features were computed for a different set of sequences, so "
+                f"using them would pair each sequence's features with another "
+                f"sequence's label. Delete the cache file and re-run."
             )
         return {"train": cached_train, "test": cached_test}
-
+    
     print("Pre-computing ESM-2 token features (this runs once and is cached)...")
 
     train_feats = compute_esm2_features(train_df["sequence"].tolist(), tokenizer, esm2_model)
     test_feats  = compute_esm2_features(test_df["sequence"].tolist(),  tokenizer, esm2_model)
 
-    np.savez(FEATURE_CACHE, train=train_feats, test=test_feats)
+    np.savez(
+        FEATURE_CACHE,
+        train=train_feats,
+        test=test_feats,
+        train_ids=train_df["seq_id"].astype(str).to_numpy(dtype="U"),
+        test_ids=test_df["seq_id"].astype(str).to_numpy(dtype="U"),
+    )
     print(f"Features cached to {FEATURE_CACHE}")
     return {"train": train_feats, "test": test_feats}
 

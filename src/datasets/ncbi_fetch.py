@@ -15,19 +15,12 @@ CHANGE vs. the original version: instead of pulling every hit that matches
 the query (~16k-30k sequences, heavily left-skewed toward the 400-500 aa
 range — see distribution plot in 01_domain_analysis.ipynb), this version:
 
-  1. Fetches only lengths first (via esummary, cheap) for the full candidate
-     pool.
+  1. Fetches only lengths first for the full candidate pool.
   2. Builds a length histogram of the POSITIVE set as the reference shape.
   3. Samples negatives per length-bin so the final negative length
      distribution matches the positive one, capped at NEG_LIMIT total.
   4. Only then fetches full FASTA records for the selected subset.
 
-This directly targets the imbalance flagged in the README
-("ncbi_fetch.py needs adjustments to produce a better-balanced
-positive/negative dataset upstream of CD-HIT") and additionally removes the
-length-distribution mismatch visible in the domain-analysis notebook, which
-would otherwise still bias the CD-HIT-clustered negative pool that class
-balancing (step 5) samples from later.
 
 Output
 ------

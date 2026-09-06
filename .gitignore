@@ -26,3 +26,12 @@ logs/
 needleall.error
 Miniconda3-latest-MacOSX-arm64.sh
 needleall.error
+
+# Local backups
+*.bak/
+
+# GraphPart temporary files
+*.fasta.tmp
+
+# Exploratory / diagnostic scripts, not part of the pipeline
+scratch/

@@ -4,6 +4,7 @@ Benchmark comparison across:
   - DepoScope, retrained on the thesis training set
   - DePP, retrained on the thesis training set
   - PhageDPO, retrained on the thesis training set
+  - DposFinder, retrained on the thesis training set
 
 All evaluated on the same test split (final_dataset_40.csv, split == 'test').
 
@@ -27,7 +28,6 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 import matplotlib.pyplot as plt
-
 from nn.cnn import CNNClassifier
 from nn.dnn import DNNClassifier
 from nn.metrics import plot_confusion_matrix
@@ -41,7 +41,22 @@ MODELS_DIR = Path("results/models")
 DEPOSCOPE_DIR = Path("results/deposcope_retrain")
 DEPP_DIR = Path("results/depp_retrain")
 PHAGEDPO_DIR = Path("results/phagedpo_retrain")
+DPOSFINDER_DIR = Path("results/dposfinder_retrain")
 OUTPUT_DIR = Path("results")
+
+# DposFinder retraining was investigated after producing perfect scores
+# across all metrics. Checked and ruled out: train/test sequence overlap
+# (0 exact and 0 prefix matches), metrics-computation bugs, and label-parsing
+# bugs. Reproduced independently at both batch_size=1 and batch_size=16 (same
+# result both times, with a healthy/gradual training curve at batch_size=16:
+# 97.7% -> 99.4% -> 100% accuracy over the first 3 epochs, not an instant
+# collapse) -- this rules out the batch_size=1 gradient-update-count artifact
+# as the explanation. Predicted probabilities remain highly polarized toward
+# 0/1 in both runs, consistent with end-to-end fine-tuning of a large
+# pretrained transformer on a well-separated binary task, not a training
+# artifact. Included in the benchmark with this caveat noted in the thesis
+# discussion section. Set to False to exclude again if needed.
+INCLUDE_DPOSFINDER = True
 
 EMBEDDING_DIMS = {
     "esm": None,     # filled in automatically from the .npy shape
@@ -208,7 +223,70 @@ print(f"[+] phagedpo_retrained: F1={results['phagedpo_retrained']['f1']:.4f}  "
 
 
 # ----------------------------
-# 6. Assemble metrics table
+# 6. DposFinder retrained — merge by seq_id, parsed from the 'label' column
+#    of DposFinder's own predict-mode output (test_set_result.tsv).
+#
+#    DposFinder's final_train mode only prints aggregate metrics -- it does
+#    NOT save per-sequence predictions. Before this section can run, DposFinder's
+#    own predict mode must be run once against the retrained checkpoint:
+#
+#      python code/main.py --mode predict \
+#          --data_path <abs path to DPOSFINDER_DIR>/ \
+#          --test_data test_set.fasta \
+#          --name dposfinder_retrained
+#
+#    (run from the DposFinder repo root, in the DposFinder conda env)
+#
+#    That writes test_set_result.tsv into DPOSFINDER_DIR with columns
+#    label / prob / pred. The 'label' column is the full FASTA header written
+#    by dposfinder_retrain.py: "{seq_id}|{orig_id} pos"/"neg" -- so seq_id is
+#    recovered the same way as for DePP (split on "|").
+#
+#    Gated by INCLUDE_DPOSFINDER (see CONFIG) -- set False to skip cleanly.
+# ----------------------------
+if INCLUDE_DPOSFINDER:
+    dposfinder_tsv = DPOSFINDER_DIR / "test_set_result.tsv"
+    if not dposfinder_tsv.exists():
+        raise FileNotFoundError(
+            f"{dposfinder_tsv} not found. Run DposFinder's own --mode predict "
+            "against the retrained checkpoint first (see comment above this "
+            "block for the exact command)."
+        )
+
+    dposfinder_df = pd.read_csv(dposfinder_tsv, sep="\t")
+    dposfinder_df["seq_id"] = dposfinder_df["label"].str.split("|").str[0]
+
+    # only pull seq_id/prob across -- dposfinder_df also has its own 'label'
+    # column (the FASTA header), which would collide with test_df's 'label'
+    # column (positive/negative) if merged wholesale
+    merged_dposfinder = test_df[["seq_id", "label"]].merge(
+        dposfinder_df[["seq_id", "prob"]], on="seq_id", how="left"
+    )
+    if merged_dposfinder["prob"].isna().any():
+        missing = merged_dposfinder[merged_dposfinder["prob"].isna()]
+        raise ValueError(f"{len(missing)} test sequences missing from DposFinder predictions: "
+                          f"{missing['seq_id'].tolist()[:5]}")
+
+    dposfinder_probs = merged_dposfinder["prob"].values
+    dposfinder_preds = (dposfinder_probs >= 0.5).astype(int)
+
+    results["dposfinder_retrained"] = {
+        "f1": f1_score(y_true, dposfinder_preds),
+        "precision": precision_score(y_true, dposfinder_preds),
+        "recall": recall_score(y_true, dposfinder_preds),
+        "auc": roc_auc_score(y_true, dposfinder_probs),
+        "accuracy": accuracy_score(y_true, dposfinder_preds),
+        "probs": dposfinder_probs,
+        "preds": dposfinder_preds,
+    }
+    print(f"[+] dposfinder_retrained: F1={results['dposfinder_retrained']['f1']:.4f}  "
+          f"AUC={results['dposfinder_retrained']['auc']:.4f}")
+else:
+    print("[!] Skipping DposFinder (INCLUDE_DPOSFINDER=False)")
+
+
+# ----------------------------
+# 7. Assemble metrics table
 # ----------------------------
 metrics_df = pd.DataFrame([
     {
@@ -228,9 +306,10 @@ print(metrics_df.to_string(index=False))
 
 
 # ----------------------------
-# 7. Bar plot: Precision, Recall, F1 (as previously requested by the supervisor)
+# 8. Bar plot: Precision, Recall, F1 (as previously requested by the supervisor)
 # ----------------------------
-EXTERNAL_TOOLS = {"deposcope_retrained", "depp_retrained", "phagedpo_retrained"}
+EXTERNAL_TOOLS = {"deposcope_retrained", "depp_retrained", "phagedpo_retrained",
+                   "dposfinder_retrained"}
 
 # Order: thesis models first (by F1, already sorted in metrics_df), then external tools
 thesis_rows = metrics_df[~metrics_df["model"].isin(EXTERNAL_TOOLS)]
@@ -266,7 +345,7 @@ ax.set_xticks(x)
 ax.set_xticklabels(plot_df.index, rotation=40, ha="right")
 ax.set_ylabel("Score")
 ax.set_ylim(0, 1.12)
-ax.set_title("Benchmark comparison: thesis models vs. retrained DepoScope, DePP and PhageDPO", pad=28)
+ax.set_title("Benchmark comparison: thesis models vs. retrained DepoScope, DePP, PhageDPO and DposFinder", pad=28)
 ax.legend(title="Metric", loc="lower right", framealpha=0.9)
 ax.yaxis.grid(True, linestyle=":", alpha=0.5)
 ax.set_axisbelow(True)
@@ -280,12 +359,152 @@ plt.close()
 
 
 # ----------------------------
-# 8. Confusion matrices for the three retrained external tools
+# 9. Confusion matrices for the four retrained external tools
 # ----------------------------
-for name in ["deposcope_retrained", "depp_retrained", "phagedpo_retrained"]:
+confusion_matrix_tools = ["deposcope_retrained", "depp_retrained", "phagedpo_retrained"]
+if INCLUDE_DPOSFINDER:
+    confusion_matrix_tools.append("dposfinder_retrained")
+
+for name in confusion_matrix_tools:
     cm = confusion_matrix(y_true, results[name]["preds"])
     cm_path = OUTPUT_DIR / f"confusion_matrix_{name}.png"
     plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}", show=False, save_path=cm_path)
     print(f"[+] Confusion matrix saved to {cm_path}")
 
-   
+
+# ----------------------------
+# 10. Additional visualizations: heatmap, dot plot, radar small multiples.
+#     Reuse ordered_df from section 8 (already sorted: thesis models first
+#     by F1, then external tools by F1) so all benchmark figures share the
+#     same model ordering.
+# ----------------------------
+from matplotlib import cm as mpl_cm  # local alias -- `cm` above is already
+                                      # bound to sklearn's confusion_matrix
+
+METRICS = ["f1", "precision", "recall", "auc", "accuracy"]
+METRIC_LABELS = {"f1": "F1", "precision": "Precision", "recall": "Recall",
+                  "auc": "AUC", "accuracy": "Accuracy"}
+
+viz_df = ordered_df.reset_index(drop=True).copy()
+viz_df["is_external"] = viz_df["model"].isin(EXTERNAL_TOOLS)
+
+
+def plot_heatmap(df, out_path):
+    data = df[METRICS].values
+    n_models, n_metrics = data.shape
+
+    fig, ax = plt.subplots(figsize=(7, 0.5 * n_models + 1.5))
+    im = ax.imshow(data, cmap="YlGnBu", vmin=0, vmax=1, aspect="auto")
+
+    ax.set_xticks(range(n_metrics))
+    ax.set_xticklabels([METRIC_LABELS[m] for m in METRICS])
+    ax.set_yticks(range(n_models))
+    ax.set_yticklabels(df["model"])
+
+    for i in range(n_models):
+        for j in range(n_metrics):
+            val = data[i, j]
+            text_color = "white" if val > 0.6 else "black"
+            ax.text(j, i, f"{val:.3f}", ha="center", va="center",
+                     color=text_color, fontsize=8)
+
+    n_thesis = (~df["is_external"]).sum()
+    if 0 < n_thesis < n_models:
+        ax.axhline(n_thesis - 0.5, color="black", linewidth=1.5)
+
+    ax.set_title("Benchmark metrics heatmap")
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Score")
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=200)
+    plt.close()
+    print(f"[+] Heatmap saved to {out_path}")
+
+
+def plot_dotplot(df, out_path):
+    n_models = len(df)
+    fig, ax = plt.subplots(figsize=(9, 0.5 * n_models + 1.5))
+
+    y_positions = np.arange(n_models)
+    dot_colors = plt.colormaps["tab10"](np.linspace(0, 1, len(METRICS)))
+
+    for y in y_positions:
+        ax.plot([0, 1], [y, y], color="lightgray", linewidth=1, zorder=1)
+
+    for j, metric in enumerate(METRICS):
+        ax.scatter(df[metric], y_positions, color=dot_colors[j], s=60,
+                   label=METRIC_LABELS[metric], zorder=3,
+                   edgecolor="white", linewidth=0.5)
+
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels(df["model"])
+    ax.invert_yaxis()
+    ax.set_xlim(0, 1.02)
+    ax.set_xlabel("Score")
+    ax.set_title("Benchmark metrics — dot plot")
+
+    n_thesis = (~df["is_external"]).sum()
+    if 0 < n_thesis < n_models:
+        ax.axhline(n_thesis - 0.5, color="black", linewidth=1, linestyle="--")
+
+    ax.legend(title="Metric", loc="upper center", bbox_to_anchor=(0.5, -0.08),
+              ncol=len(METRICS), framealpha=0.9)
+    ax.xaxis.grid(True, linestyle=":", alpha=0.5)
+    ax.set_axisbelow(True)
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close()
+    print(f"[+] Dot plot saved to {out_path}")
+
+
+def plot_radar_small_multiples(df, out_path):
+    """
+    One small radar (pentagon, 5 metrics) per model, in a grid. A single
+    overlaid radar with this many models would be unreadable -- small
+    multiples keep each model's shape legible while still allowing visual
+    comparison of overall shape/balance across metrics.
+    """
+    n_models = len(df)
+    n_cols = 5
+    n_rows = int(np.ceil(n_models / n_cols))
+
+    angles = np.linspace(0, 2 * np.pi, len(METRICS), endpoint=False).tolist()
+    angles += angles[:1]
+
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(3.2 * n_cols, 3.2 * n_rows),
+                              subplot_kw=dict(polar=True))
+    axes = np.array(axes).reshape(-1)
+
+    for idx, (_, row) in enumerate(df.iterrows()):
+        ax = axes[idx]
+        values = [row[m] for m in METRICS]
+        values += values[:1]
+
+        color = "#DD8452" if row["is_external"] else "#4C72B0"
+        ax.plot(angles, values, color=color, linewidth=1.5)
+        ax.fill(angles, values, color=color, alpha=0.25)
+
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels([METRIC_LABELS[m] for m in METRICS], fontsize=7)
+        ax.set_ylim(0, 1)
+        ax.set_yticks([0.5, 1.0])
+        ax.set_yticklabels(["0.5", "1.0"], fontsize=6)
+        ax.set_title(row["model"], fontsize=9, pad=12)
+
+    for idx in range(n_models, len(axes)):
+        axes[idx].axis("off")
+
+    fig.suptitle("Benchmark metrics — per-model radar (blue = thesis models, orange = retrained external tools)",
+                 fontsize=11, y=1.02)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close()
+    print(f"[+] Radar small multiples saved to {out_path}")
+
+
+plot_heatmap(viz_df, OUTPUT_DIR / "benchmark_heatmap.png")
+plot_dotplot(viz_df, OUTPUT_DIR / "benchmark_dotplot.png")
+plot_radar_small_multiples(viz_df, OUTPUT_DIR / "benchmark_radar.png")
