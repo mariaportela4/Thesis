@@ -9,6 +9,16 @@ scripts under src/ via subprocess -- it does not reimplement any of their
 logic. All paths are resolved relative to this file's own directory, so the
 project can be cloned anywhere.
 
+Requirements
+------------
+Two conda environments are needed: the main one (environment.yml) and
+DposFinder's own (environment-dposfinder.yml), whose dependencies conflict
+with this project's. Both are created with `conda env create -f <file>`.
+CD-HIT, EMBOSS (needleall) and GraphPart come from the main environment; the
+DepoScope weights are downloaded from Zenodo on first run.
+
+`python run_pipeline.py --check` verifies everything resolves before running.
+
 Stages
 ------
 The pipeline runs as a sequence of named stages (see STAGE_ORDER). Each one
@@ -35,6 +45,7 @@ checked explicitly:
   * Edge-count check  -- GraphPart's stdout is teed and parsed; a graph with
                          zero edges aborts the run instead of writing a
                          meaningless assignment file.
+
 
 Usage (run from the project root)
 ---------------------------------
