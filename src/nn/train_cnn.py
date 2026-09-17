@@ -2,6 +2,7 @@ from cnn import CNNClassifier
 
 import os
 import json
+import random
 import argparse
 import numpy as np
 import pandas as pd
@@ -18,6 +19,11 @@ Loads pre-split protein embedding arrays, trains the model with
 BCEWithLogitsLoss and Adam optimisation, and saves the trained weights
 and per-epoch loss history to disk.
 
+Training stops early once the validation loss has not improved by more than
+--min-delta for --patience consecutive epochs; the weights saved are those
+of the stopping epoch. All random number generators are seeded (--seed) so
+that repeated runs with identical arguments produce identical models.
+
 Hyperparameters (lr, batch_size, weight_decay, dropout) are loaded
 automatically from results/tuning/cnn_<embedding>_best_params.json,
 if that file exists (produced by tune_hyperparams.py). Any value passed
@@ -26,21 +32,42 @@ explicitly on the command line overrides the tuned one for that run only.
 Usage
 -----
     python src/nn/train_cnn.py --embedding esm
-        # uses results/tuning/cnn_esm_best_params.json if present,
-        # otherwise falls back to the architecture defaults below.
+         uses results/tuning/cnn_esm_best_params.json if present,
+         otherwise falls back to the architecture defaults below.
 
     python src/nn/train_cnn.py --embedding bert --lr 5e-4
-        # same, but overrides just the learning rate for this run.
+         same, but overrides just the learning rate for this run.
 
     python src/nn/train_cnn.py --embedding prott5 --no-tuned-params
-        # ignores any tuned params file and uses the architecture
-        # defaults (lr=1e-3, batch_size=32, weight_decay=1e-5, dropout=0.3).
+         ignores any tuned params file and uses the architecture
+         defaults (lr=1e-3, batch_size=32, weight_decay=1e-5, dropout=0.3).
 
 Outputs
 -------
     results/models/cnn_<embedding>.pt              — model state dict
     results/history/cnn_<embedding>_history.csv    — epoch / train_loss / val_loss
+    results/history/cnn_<embedding>_summary.json   — seed, stopping epoch, best epoch
 """
+
+# REPRODUCIBILITY
+def set_seed(seed):
+    """
+    Seed every random number generator involved in training and force
+    deterministic cuDNN kernels, so that two runs with the same arguments
+    produce identical weights.
+
+    Parameters
+    ----------
+    seed : int
+        Value applied to Python's ``random``, NumPy, and PyTorch (CPU and CUDA).
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
 
 def load_data(embedding_name):
     """
@@ -77,16 +104,18 @@ def load_data(embedding_name):
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-# DATALOADER CREATION
-def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_size):
+
+# DataLoader Creation
+def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_size, seed):
     """
     Convert NumPy arrays into PyTorch DataLoaders.
 
     The training loader uses ``shuffle=True`` so the model sees batches in
     a different order each epoch, which reduces the risk of the optimiser
-    following spurious gradient patterns tied to data ordering.
-    Validation and test loaders use ``shuffle=False`` to keep results
-    reproducible and aligned with the metadata CSV.
+    following spurious gradient patterns tied to data ordering. It is given
+    an explicitly seeded generator so that this shuffling is reproducible
+    across runs. Validation and test loaders use ``shuffle=False`` to keep
+    results aligned with the metadata CSV.
 
     Parameters
     ----------
@@ -96,17 +125,18 @@ def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_siz
         Binary label arrays of shape ``(n_samples,)``.
     batch_size : int
         Number of samples per mini-batch for all three loaders.
+    seed : int
+        Seed for the training loader's shuffling generator.
 
     Returns
     -------
     train_loader : DataLoader
-        Shuffled DataLoader for the training split.
+        Shuffled, seeded DataLoader for the training split.
     val_loader : DataLoader
         Ordered DataLoader for the validation split.
     test_loader : DataLoader
         Ordered DataLoader for the test split.
     """
-
     X_train = torch.tensor(X_train, dtype=torch.float32)
     X_val = torch.tensor(X_val, dtype=torch.float32)
     X_test = torch.tensor(X_test, dtype=torch.float32)
@@ -118,7 +148,8 @@ def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_siz
     train_loader = DataLoader(
         TensorDataset(X_train, y_train),
         batch_size=batch_size,
-        shuffle=True                         # Shuffle training data each epoch
+        shuffle=True,                        # Shuffle training data each epoch
+        generator=torch.Generator().manual_seed(seed)
     )
 
     val_loader = DataLoader(
@@ -135,7 +166,8 @@ def create_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_siz
 
     return train_loader, val_loader, test_loader
 
-# HYPERPARAMETER LOADING
+
+# Hyperparameter Loading
 def load_best_params(arch, embedding, tuning_dir="results/tuning"):
     """
     Load the best hyperparameters found by tune_hyperparams.py for a given
@@ -163,10 +195,12 @@ def load_best_params(arch, embedding, tuning_dir="results/tuning"):
         data = json.load(f)
     return data["best_params"]
 
-# TRAINING LOOP
-def train_model(model, train_loader, val_loader, criterion, optimizer, device, epochs, model_path):
+
+# Training Loop
+def train_model(model, train_loader, val_loader, criterion, optimizer, device,
+                epochs, patience, min_delta):
     """
-    Run the full training loop and return per-epoch loss history.
+    Run the training loop with early stopping on the validation loss.
 
     Each epoch consists of:
       1. A training phase — gradients are computed and weights updated.
@@ -175,6 +209,11 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
 
     The model is switched between ``train()`` and ``eval()`` modes so that
     Batch Normalisation and Dropout behave correctly in each phase.
+
+    Training stops as soon as ``patience`` consecutive epochs pass without the
+    validation loss improving by more than ``min_delta``. The weights left in
+    ``model`` are those of the stopping epoch, not of the best epoch; the best
+    epoch is still recorded in the returned summary for diagnosis.
 
     Parameters
     ----------
@@ -193,23 +232,30 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
     device : torch.device
         Device on which tensors and the model reside.
     epochs : int
-        Total number of full passes over the training data.
+        Maximum number of full passes over the training data.
+    patience : int
+        Epochs with no validation improvement tolerated before stopping.
+    min_delta : float
+        Minimum decrease in validation loss that counts as an improvement.
 
     Returns
     -------
-    list[dict]
-        List of dicts, one per epoch, each containing:
-        ``{"epoch": int, "train_loss": float, "val_loss": float}``.
-        Suitable for direct conversion to a DataFrame with
-        ``pd.DataFrame(history)``.
+    history : list[dict]
+        One dict per epoch: ``{"epoch": int, "train_loss": float,
+        "val_loss": float}``. Suitable for direct conversion to a DataFrame
+        with ``pd.DataFrame(history)``.
+    summary : dict
+        Stopping epoch, best epoch and the corresponding validation losses.
     """
     history = []
     best_val_loss = float("inf")
+    best_epoch = 0
+    epochs_without_improvement = 0
+    early_stopped = False
 
-    for epoch in range(epochs):
-        # Training phase
-        model.train()           # Enables Dropout and BatchNorm training behaviour
-        train_loss = 0.0
+    for epoch in range(1, epochs + 1):
+        model.train()
+        train_loss, n_train = 0.0, 0
 
         for X_batch, y_batch in train_loader:
             X_batch = X_batch.to(device)
@@ -218,21 +264,19 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
             outputs = model(X_batch).squeeze(1)
             loss = criterion(outputs, y_batch)
 
-            # Standard gradient update: zero → backward → step
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            train_loss += loss.item()
+            train_loss += loss.item() * len(y_batch)
+            n_train += len(y_batch)
 
-        # Average loss over all batches in the epoch
-        train_loss /= len(train_loader)
+        train_loss /= n_train
 
-        # Validation phase
-        model.eval()             # Disables Dropout; BatchNorm uses running statistics
-        val_loss = 0.0
+        model.eval()
+        val_loss, n_val = 0.0, 0
 
-        with torch.no_grad():      # No gradient tracking needed for evaluation
+        with torch.no_grad():
             for X_batch, y_batch in val_loader:
                 X_batch = X_batch.to(device)
                 y_batch = y_batch.to(device)
@@ -240,51 +284,49 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, e
                 outputs = model(X_batch).squeeze(1)
                 loss = criterion(outputs, y_batch)
 
-                val_loss += loss.item()
+                val_loss += loss.item() * len(y_batch)
+                n_val += len(y_batch)
 
-        val_loss /= len(val_loader)
-
-        # Save best checkpoint
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            torch.save(model.state_dict(), model_path)
-            print(f"  --> New best model saved (val_loss={val_loss:.4f})")
+        val_loss /= n_val
 
         history.append({
-            "epoch": epoch + 1,            # 1-indexed for readability in logs
+            "epoch": epoch,
             "train_loss": train_loss,
             "val_loss": val_loss
         })
 
         print(
-            f"Epoch {epoch+1}/{epochs} | "
+            f"Epoch {epoch}/{epochs} | "
             f"Train Loss: {train_loss:.4f} | "
             f"Val Loss: {val_loss:.4f}"
         )
-    print(f"Best val loss: {best_val_loss:.4f}")
 
-    return history
+        # --- Early stopping check ---
+        if val_loss < best_val_loss - min_delta:
+            best_val_loss = val_loss
+            best_epoch = epoch
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
+            if epochs_without_improvement >= patience:
+                early_stopped = True
+                print(f"  --> Early stopping at epoch {epoch} "
+                      f"(best epoch: {best_epoch}, best val_loss: {best_val_loss:.4f})")
+                break
 
-# ENTRY POINT
+    summary = {
+        "early_stopped": early_stopped,
+        "stop_epoch": epoch,
+        "final_val_loss": val_loss,
+        "best_epoch": best_epoch,
+        "best_val_loss": best_val_loss,
+    }
+
+    print(f"Best val loss: {best_val_loss:.4f} (epoch {best_epoch})")
+    return history, summary
+
 
 def main():
-    """
-    Parse command-line arguments, train the CNN, and save outputs.
-
-    Command-line arguments
-    ----------------------
-    --embedding : str, required
-        Embedding type to use. One of ``"esm"``, ``"bert"``, ``"prott5"``.
-    --epochs : int, default 50
-        Number of training epochs.
-    --batch_size : int, default 32
-        Mini-batch size for all DataLoaders.
-    --lr : float, default 1e-3
-        Adam learning rate.
-    --weight_decay : float, default 1e-5
-        L2 regularisation coefficient passed to Adam. Penalises large
-        weights to reduce overfitting alongside Dropout.
-    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -295,9 +337,16 @@ def main():
         help="Embedding type to train the CNN model."
     )
 
-    parser.add_argument("--epochs", type=int, default=50)
-    # Hyperparameters default to None so we can tell "not passed by user"
-    # apart from "explicitly set" -- lets tuned values fill the gaps below.
+    parser.add_argument("--epochs", type=int, default=50,
+                        help="Maximum number of epochs; early stopping may end training sooner.")
+    parser.add_argument("--patience", type=int, default=5,
+                        help="Epochs with no val_loss improvement before training stops.")
+    parser.add_argument("--min-delta", type=float, default=1e-4,
+                        help="Minimum val_loss decrease that counts as an improvement.")
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Random seed for weight initialisation, dropout and batch shuffling.")
+    # Default to None so tuned values (if present) can fill the gaps;
+    # anything the user passes explicitly on the CLI always wins.
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument("--weight_decay", type=float, default=None)
@@ -313,8 +362,14 @@ def main():
 
     print(f"Training CNN using {args.embedding} embeddings")
 
+    # Seed everything before any model or loader is created
+    set_seed(args.seed)
+    print(f"[+] Random seed: {args.seed}")
+
     # --- Resolve hyperparameters: tuned JSON < CLI override < hardcoded defaults ---
-    ARCH_DEFAULTS = {"lr": 1e-3, "batch_size": 32, "weight_decay": 1e-5, "dropout": 0.3}
+    ARCH_DEFAULTS = {
+        "lr": 1e-3, "batch_size": 32, "weight_decay": 1e-5, "dropout": 0.3,
+    }
 
     best_params = None if args.no_tuned_params else load_best_params("cnn", args.embedding)
     if best_params is not None:
@@ -342,6 +397,7 @@ def main():
 
     print(f"[+] Final hyperparameters -- lr={args.lr}, batch_size={args.batch_size}, "
           f"weight_decay={args.weight_decay}, dropout={args.dropout}")
+    print(f"[+] Early stopping -- patience={args.patience}, min_delta={args.min_delta}")
 
     # --- Load data ---
     X_train, X_val, X_test, y_train, y_val, y_test = load_data(args.embedding)
@@ -349,7 +405,8 @@ def main():
     print("Train:", X_train.shape, y_train.shape)
     print("Validation:", X_val.shape, y_val.shape)
     print("Test:", X_test.shape, y_test.shape)
-     # --- Build DataLoaders ---
+
+    # --- Build DataLoaders ---
     train_loader, val_loader, _ = create_dataloaders(
         X_train,
         X_val,
@@ -357,7 +414,8 @@ def main():
         y_train,
         y_val,
         y_test,
-        args.batch_size
+        args.batch_size,
+        args.seed
     )
 
     # --- Model, loss, optimiser ---
@@ -386,7 +444,7 @@ def main():
     model_path = f"results/models/cnn_{args.embedding}.pt"
 
     # --- Train ---
-    history = train_model(
+    history, summary = train_model(
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
@@ -394,9 +452,12 @@ def main():
         optimizer=optimizer,
         device=device,
         epochs=args.epochs,
-        model_path=model_path
+        patience=args.patience,
+        min_delta=args.min_delta
     )
 
+    # Weights of the stopping epoch, saved once after training ends
+    torch.save(model.state_dict(), model_path)
 
     # Loss history — one row per epoch, columns: epoch / train_loss / val_loss
     history_df = pd.DataFrame(history)
@@ -405,8 +466,13 @@ def main():
         index=False
     )
 
+    summary_path = f"results/history/cnn_{args.embedding}_summary.json"
+    with open(summary_path, "w") as f:
+        json.dump({**summary, "seed": args.seed}, f, indent=2)
+
     print(f"Model saved to: {model_path}")
     print(f"Training history saved to: results/history/cnn_{args.embedding}_history.csv")
+    print(f"Run summary saved to: {summary_path}")
 
 
 if __name__ == "__main__":

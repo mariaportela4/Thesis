@@ -1,9 +1,14 @@
 {
   "best_params": {
-    "lr": 0.002780500176272398,
+    "lr": 0.00314288089084011,
     "batch_size": 16,
-    "weight_decay": 0.0002639000388994651,
-    "dropout": 0.10607435563217954
+    "weight_decay": 8.179499475211674e-06,
+    "dropout": 0.3099025726528951
   },
-  "best_val_loss": 0.1537567339837551
+  "best_val_loss": 0.25975415923378686,
+  "seed": 42,
+  "patience": 5,
+  "min_delta": 0.0001,
+  "stop_epoch": 30,
+  "best_epoch": 29
 }

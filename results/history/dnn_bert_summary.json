@@ -1,0 +1,8 @@
+{
+  "early_stopped": true,
+  "stop_epoch": 11,
+  "final_val_loss": 0.1253787807442925,
+  "best_epoch": 6,
+  "best_val_loss": 0.1102220199324868,
+  "seed": 42
+}

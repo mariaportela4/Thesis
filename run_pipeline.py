@@ -101,6 +101,13 @@ GRAPHPART_VAL_RATIO = 0.05
 GRAPHPART_ASSIGNMENTS = "results/graphpart/graphpart_assignments_40.csv"
 FINAL_DATASET = "data/final_dataset_40.csv"
 
+# GraphPart (60% identity partitioning)
+# GRAPHPART_THRESHOLD = 0.6
+# GRAPHPART_TEST_RATIO = 0.1
+# GRAPHPART_VAL_RATIO = 0.05
+# GRAPHPART_ASSIGNMENTS = "results/graphpart/graphpart_assignments_60.csv"
+# FINAL_DATASET = "data/final_dataset_60.csv"
+
 # Compute
 THREADS = 12
 
