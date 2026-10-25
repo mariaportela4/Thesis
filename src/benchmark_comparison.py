@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.metrics import (
-    accuracy_score, f1_score, precision_score, recall_score, roc_auc_score,
+    accuracy_score, f1_score, precision_score, recall_score, average_precision_score,
     confusion_matrix,
 )
 import matplotlib.pyplot as plt
@@ -41,7 +41,7 @@ MODELS_DIR = Path("results/models")
 DEPOSCOPE_DIR = Path("results/deposcope_retrain")
 DEPP_DIR = Path("results/depp_retrain")
 PHAGEDPO_DIR = Path("results/phagedpo_retrain")
-DPOSFINDER_DIR = Path("results/dposfinder_retrain")
+DPOSFINDER_DIR = Path("results/dposfinder_retrain_trainonly")
 OUTPUT_DIR = Path("results")
 
 # DposFinder retraining was investigated after producing perfect scores
@@ -126,7 +126,7 @@ for name, arch, embedding in model_configs:
         probs = torch.sigmoid(logits).cpu().numpy()
 
     preds = (probs >= 0.5).astype(int)
-    
+
     cm = confusion_matrix(y_true, preds)
     cm_path = OUTPUT_DIR / f"confusion_matrix_{name}.png"
     plot_confusion_matrix(cm, title=f"Confusion Matrix — {name}", show=False, save_path=cm_path)
@@ -135,12 +135,12 @@ for name, arch, embedding in model_configs:
         "f1": f1_score(y_true, preds),
         "precision": precision_score(y_true, preds),
         "recall": recall_score(y_true, preds),
-        "auc": roc_auc_score(y_true, probs),
+        "pr_auc": average_precision_score(y_true, probs),
         "accuracy": accuracy_score(y_true, preds),
         "probs": probs,
         "preds": preds,
     }
-    print(f"[+] {name}: F1={results[name]['f1']:.4f}  AUC={results[name]['auc']:.4f}")
+    print(f"[+] {name}: F1={results[name]['f1']:.4f}  PR-AUC={results[name]['pr_auc']:.4f}")
 
 
 # ----------------------------
@@ -153,13 +153,13 @@ results["deposcope_retrained"] = {
     "f1": f1_score(y_true, deposcope_preds),
     "precision": precision_score(y_true, deposcope_preds),
     "recall": recall_score(y_true, deposcope_preds),
-    "auc": roc_auc_score(y_true, deposcope_probs),
+    "pr_auc": average_precision_score(y_true, deposcope_probs),
     "accuracy": accuracy_score(y_true, deposcope_preds),
     "probs": deposcope_probs,
     "preds": deposcope_preds,
 }
 print(f"[+] deposcope_retrained: F1={results['deposcope_retrained']['f1']:.4f}  "
-      f"AUC={results['deposcope_retrained']['auc']:.4f}")
+      f"PR-AUC={results['deposcope_retrained']['pr_auc']:.4f}")
 
 
 # ----------------------------
@@ -182,13 +182,13 @@ results["depp_retrained"] = {
     "f1": f1_score(y_true, depp_preds),
     "precision": precision_score(y_true, depp_preds),
     "recall": recall_score(y_true, depp_preds),
-    "auc": roc_auc_score(y_true, depp_probs),
+    "pr_auc": average_precision_score(y_true, depp_probs),
     "accuracy": accuracy_score(y_true, depp_preds),
     "probs": depp_probs,
     "preds": depp_preds,
 }
 print(f"[+] depp_retrained: F1={results['depp_retrained']['f1']:.4f}  "
-      f"AUC={results['depp_retrained']['auc']:.4f}")
+      f"PR-AUC={results['depp_retrained']['pr_auc']:.4f}")
 
 
 # ----------------------------
@@ -213,13 +213,13 @@ results["phagedpo_retrained"] = {
     "f1": f1_score(y_true, phagedpo_preds),
     "precision": precision_score(y_true, phagedpo_preds),
     "recall": recall_score(y_true, phagedpo_preds),
-    "auc": roc_auc_score(y_true, phagedpo_probs),
+    "pr_auc": average_precision_score(y_true, phagedpo_probs),
     "accuracy": accuracy_score(y_true, phagedpo_preds),
     "probs": phagedpo_probs,
     "preds": phagedpo_preds,
 }
 print(f"[+] phagedpo_retrained: F1={results['phagedpo_retrained']['f1']:.4f}  "
-      f"AUC={results['phagedpo_retrained']['auc']:.4f}")
+      f"PR-AUC={results['phagedpo_retrained']['pr_auc']:.4f}")
 
 
 # ----------------------------
@@ -274,13 +274,13 @@ if INCLUDE_DPOSFINDER:
         "f1": f1_score(y_true, dposfinder_preds),
         "precision": precision_score(y_true, dposfinder_preds),
         "recall": recall_score(y_true, dposfinder_preds),
-        "auc": roc_auc_score(y_true, dposfinder_probs),
+        "pr_auc": average_precision_score(y_true, dposfinder_probs),
         "accuracy": accuracy_score(y_true, dposfinder_preds),
         "probs": dposfinder_probs,
         "preds": dposfinder_preds,
     }
     print(f"[+] dposfinder_retrained: F1={results['dposfinder_retrained']['f1']:.4f}  "
-          f"AUC={results['dposfinder_retrained']['auc']:.4f}")
+          f"PR-AUC={results['dposfinder_retrained']['pr_auc']:.4f}")
 else:
     print("[!] Skipping DposFinder (INCLUDE_DPOSFINDER=False)")
 
@@ -294,7 +294,7 @@ metrics_df = pd.DataFrame([
         "f1": r["f1"],
         "precision": r["precision"],
         "recall": r["recall"],
-        "auc": r["auc"],
+        "pr_auc": r["pr_auc"],
         "accuracy": r["accuracy"],
     }
     for name, r in results.items()
@@ -381,9 +381,9 @@ for name in confusion_matrix_tools:
 from matplotlib import cm as mpl_cm  # local alias -- `cm` above is already
                                       # bound to sklearn's confusion_matrix
 
-METRICS = ["f1", "precision", "recall", "auc", "accuracy"]
+METRICS = ["f1", "precision", "recall", "pr_auc", "accuracy"]
 METRIC_LABELS = {"f1": "F1", "precision": "Precision", "recall": "Recall",
-                  "auc": "AUC", "accuracy": "Accuracy"}
+                  "pr_auc": "PR-AUC", "accuracy": "Accuracy"}
 
 viz_df = ordered_df.reset_index(drop=True).copy()
 viz_df["is_external"] = viz_df["model"].isin(EXTERNAL_TOOLS)

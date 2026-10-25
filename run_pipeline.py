@@ -101,13 +101,6 @@ GRAPHPART_VAL_RATIO = 0.05
 GRAPHPART_ASSIGNMENTS = "results/graphpart/graphpart_assignments_40.csv"
 FINAL_DATASET = "data/final_dataset_40.csv"
 
-# GraphPart (60% identity partitioning)
-# GRAPHPART_THRESHOLD = 0.6
-# GRAPHPART_TEST_RATIO = 0.1
-# GRAPHPART_VAL_RATIO = 0.05
-# GRAPHPART_ASSIGNMENTS = "results/graphpart/graphpart_assignments_60.csv"
-# FINAL_DATASET = "data/final_dataset_60.csv"
-
 # Compute
 THREADS = 12
 
@@ -152,7 +145,7 @@ DPOSFINDER_RUN_NAME = "dposfinder_retrained"
 # (thesis_env lacks its dependencies, e.g. logomaker), so its interpreter is
 # given explicitly rather than inherited from this pipeline.
 DPOSFINDER_PYTHON = "/home/mcarvalho/miniconda3/envs/DposFinder/bin/python"
-DPOSFINDER_OUT_DIR = "results/dposfinder_retrain"
+DPOSFINDER_OUT_DIR = "results/dposfinder_retrain_trainonly"
 
 # Retraining scripts for the four external baselines, with any arguments they
 # require. All four live under src/; the DePP and DposFinder ones reach into

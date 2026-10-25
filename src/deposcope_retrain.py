@@ -45,6 +45,7 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 from tqdm import tqdm
 
+
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────
@@ -336,12 +337,20 @@ def main():
         f"length mismatch — feature cache is out of sync with the current split."
     )
 
-    # Use 10% of train as validation for early stopping
-    n_val       = max(1, int(0.1 * len(train_feats)))
-    val_feats   = train_feats[-n_val:]
-    val_labels  = train_labels[-n_val:]
-    tr_feats    = train_feats[:-n_val]
-    tr_labels   = train_labels[:-n_val]
+    # Early stopping uses the dataset's own validation partition, the same 88
+    # sequences used by the six thesis models, so that every iteratively
+    # trained model selects its checkpoint on identical data. The previous
+    # version held out the last 10% of the training rows positionally; because
+    # the table is ordered by class, that slice contained no positive sequence.
+    valid_df   = df[df["split"] == "valid"].reset_index(drop=True)
+    val_feats  = compute_esm2_features(valid_df["sequence"].tolist(),
+                                       tokenizer, esm2_model)
+    val_labels = (valid_df["label"] == "positive").astype(np.float32).values
+
+    tr_feats, tr_labels = train_feats, train_labels
+
+    assert 0 < val_labels.sum() < len(val_labels), \
+        "validation partition is single-class -- early stopping would be meaningless"
 
     train_loader = DataLoader(TokenFeatureDataset(tr_feats, tr_labels),
                               batch_size=BATCH_SIZE, shuffle=True)

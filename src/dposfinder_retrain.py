@@ -17,12 +17,11 @@ library, so this script's job is purely:
      columns from the GraphPart 40% run) and convert it into DposFinder's
      expected format: plain FASTA, header ending in the literal "pos" or
      "neg".
-  2. Merge the GraphPart val split into DposFinder's train_set.fasta, since
-     DposFinder's `final_train` mode has no separate validation phase -- it
-     trains on the whole train_set.fasta with no held-out set, and evaluates
-     each epoch directly on test_set.fasta. (Same treatment as the other
-     retrained tools: give each the full non-test data it expects, and never
-     let it touch the 176-sequence test set until evaluation.)
+    2. Write the GraphPart train split as DposFinder's train_set.fasta. The
+     validation split is not used: DposFinder's `final_train` mode has no
+     validation phase -- it trains on the whole train_set.fasta for a fixed
+     number of epochs and evaluates each epoch on test_set.fasta, which also
+     drives its learning-rate scheduler.
   3. Invoke DposFinder's code/main.py --mode final_train as a subprocess,
      exactly the way DepoScope/DePP/PhageDPO retraining was orchestrated.
 
@@ -125,10 +124,10 @@ def main():
     print("  split sizes found:")
     print(counts.to_string())
 
-    train_df = df[df["split"].isin(["train", "val", "valid"])]
+    train_df = df[df["split"] == "train"]
     test_df = df[df["split"] == "test"]
 
-    print(f"  train+val (DposFinder train_set): {len(train_df)}")
+    print(f"  train (DposFinder train_set): {len(train_df)}")
     print(f"  test (DposFinder test_set):        {len(test_df)}")
     if len(test_df) != 176:
         print(f"WARNING: expected 176 test sequences, got {len(test_df)} "
