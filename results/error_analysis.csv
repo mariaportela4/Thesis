@@ -1,0 +1,177 @@
+seq_id,orig_id,product,organism,label,dnn_esm_prob,dnn_esm_wrong,dnn_bert_prob,dnn_bert_wrong,dnn_prott5_prob,dnn_prott5_wrong,cnn_esm_prob,cnn_esm_wrong,cnn_bert_prob,cnn_bert_wrong,cnn_prott5_prob,cnn_prott5_wrong,n_models_wrong
+seq000063,DAH16305.1,"MAG TPA: tail protein, partial",Caudoviricetes sp.,positive,0.05028346,True,0.051301677,True,0.06251073,True,0.7677972,False,0.29884192,True,0.10512415,True,5
+seq000039,DAJ05247.1,MAG TPA: hydrolase,Caudoviricetes sp.,positive,0.9831586,False,0.97112566,False,0.991856,False,0.42862195,True,0.28124136,True,0.08370421,True,3
+seq000969,YP_011897730.1,tail fiber protein,Salmonella phage vB_StyS-LmqsSP1,negative,0.07374894,False,0.010791045,False,0.05317477,False,0.7622743,True,0.86748016,True,0.7320739,True,3
+seq000911,YP_011992005.1,central straight fiber,Escherichia phage GreteKellenberger,negative,0.048845805,False,0.035165686,False,0.040079027,False,0.65947163,True,0.8510931,True,0.71286076,True,3
+seq001162,YP_010064419.1,minor tail protein,Enterococcus phage vb_GEC_Ef_S_9,negative,0.06998736,False,0.0059630587,False,0.0020471914,False,0.8656178,True,0.77812594,True,0.4084249,False,2
+seq000535,DAI17259.1,MAG TPA: tailspike protein,Caudoviricetes sp.,positive,0.9452931,False,0.20877029,True,0.7066502,False,0.1365485,True,0.61638415,False,0.9380375,False,2
+seq000289,CAB4132813.1,Pectate lyase superfamily protein,uncultured Caudovirales phage,positive,0.99697196,False,0.81427145,False,0.99951494,False,2.4267585e-05,True,0.91980726,False,0.074738525,True,2
+seq000060,DAK76283.1,MAG TPA: GDSL like Lipase Acylhydrolase,Caudoviricetes sp.,positive,0.99921215,False,0.9997209,False,0.95091337,False,0.7538093,False,0.6725121,False,0.28189158,True,1
+seq000326,DAR03109.1,MAG TPA: Pectate lyase,Caudoviricetes sp.,positive,0.6193292,False,0.09727343,True,0.9870164,False,0.8656178,False,0.71229583,False,0.55866736,False,1
+seq000458,DAT57708.1,MAG TPA: tail protein,Caudoviricetes sp.,positive,0.91834575,False,0.44135377,True,0.986691,False,0.6383132,False,0.8530555,False,0.8856178,False,1
+seq000756,YP_013032913.1,attachment glycoprotein,Wenzhou Myotis laniger paramyxovirus 2,negative,5.663327e-06,False,1.3842941e-05,False,0.0012650104,False,0.00037815634,False,0.7704535,True,0.001556608,False,1
+seq000772,YP_013609260.1,MAG: putative capsid protein,CRESS virus sp. cta0f7,negative,0.0008075929,False,0.0008253189,False,0.000308739,False,0.00022953535,False,0.5184408,True,0.00085520116,False,1
+seq000488,DAS37090.1,MAG TPA: Phosphodiester glycosidase,Caudoviricetes sp.,positive,0.9640108,False,0.77923536,False,0.9554342,False,0.2586763,True,0.70713985,False,0.9568487,False,1
+seq000332,DAH89160.1,MAG TPA: tailspike protein,Caudoviricetes sp.,positive,0.79215646,False,0.41707122,True,0.9917494,False,0.8656178,False,0.74856883,False,0.6219244,False,1
+seq000348,DAF26892.1,MAG TPA: Pectate lyase,Caudoviricetes sp.,positive,0.85337013,False,0.45598847,True,0.99402964,False,0.8656178,False,0.6742068,False,0.8547433,False,1
+seq000026,DAL34678.1,MAG TPA_asm: laminarinase-like protein,Caudoviricetes sp.,positive,0.97864985,False,0.21262057,True,0.9852469,False,0.73372996,False,0.81689036,False,0.8427357,False,1
+seq000663,YP_012153630.1,putative tail or base plate protein,Listeria phage HB17054,negative,0.0003218398,False,7.795165e-10,False,0.00023871576,False,0.00048083684,False,0.523227,True,0.0029256328,False,1
+seq001148,YP_013607690.1,Distal tail protein Dit,Enterococcus phage dArtagnan,negative,0.010026885,False,0.006301468,False,0.0016114947,False,0.4388989,False,0.82755685,True,0.25461048,False,1
+seq001219,YP_009507330.1,glycoprotein,Eothenomys miletus hantavirus LX309,negative,3.438398e-06,False,1.257585e-06,False,3.969215e-05,False,3.310079e-11,False,0.5755534,True,3.6373527e-05,False,1
+seq001172,YP_013613307.1,cell attachment protein,Piparella virus,negative,5.18265e-06,False,0.00026327095,False,0.0055967914,False,0.00080380094,False,0.72780883,True,0.00044593326,False,1
+seq001322,YP_013019615.1,capsid protein,Antarctic virus COCH21_47,negative,0.00014620666,False,1.1774994e-05,False,3.1992517e-05,False,2.1080634e-05,False,0.69248235,True,0.00026409427,False,1
+seq001028,YP_013611053.1,protein of unknown function DUF4114,Yasminevirus sp. GU-2018,negative,0.0009964753,False,0.0052363523,False,0.0048251883,False,1.0729529e-05,False,0.69193524,True,0.01563862,False,1
+seq000861,YP_013610288.1,MAG: putative glycoprotein,Alphanucleorhabdovirus xinjianensis,negative,1.571799e-05,False,3.2311178e-05,False,3.186208e-05,False,4.8474152e-11,False,0.61054957,True,8.490765e-05,False,1
+seq000932,YP_013611633.1,GH3 auxin-responsive promoter,Yasminevirus sp. GU-2018,negative,3.260756e-07,False,6.897872e-08,False,1.2908235e-05,False,5.3517066e-08,False,0.59401363,True,0.006168308,False,1
+seq000721,YP_013607302.1,"BppU family phage baseplate upper protein, partial",Enterococcus phage 9184,negative,0.0021738664,False,0.0012978072,False,0.00042417535,False,0.16952544,False,0.77527404,True,0.021780893,False,1
+seq000687,YP_013611356.1,ATP-dependent metallopeptidase FtsH/Yme1/Tma family protein,Yasminevirus sp. GU-2018,negative,1.7722372e-06,False,1.2489134e-07,False,0.00069002603,False,7.420457e-05,False,0.5080607,True,0.024439905,False,1
+seq001715,YP_013032906.1,attachment glycoprotein,Wenzhou Myotis davidii paramyxovirus 1,negative,7.3613232e-06,False,4.3540554e-06,False,0.0011228673,False,0.00053357944,False,0.76657957,True,0.002202236,False,1
+seq001582,YP_013553624.1,attachment glycoprotein,Wufeng Rhinolophus pearsonii paramyxovirus 1,negative,2.6940024e-05,False,1.3593776e-05,False,0.0045633316,False,0.0023994457,False,0.8020855,True,0.0015029352,False,1
+seq001527,YP_013610222.1,movement protein,Tobacco polerovirus 1,negative,1.5127152e-07,False,7.328794e-09,False,0.0006149116,False,1.2038799e-17,False,0.6032988,True,0.010745899,False,1
+seq001345,YP_009625861.1,minor tail protein,Enterococcus phage AUEF3,negative,0.00026655995,False,0.0009981899,False,0.0031818482,False,0.0008414123,False,0.78159153,True,0.07239824,False,1
+seq001585,YP_013613315.1,cell attachment protein,Plecomyxo virus,negative,6.3334155e-06,False,3.8219638e-05,False,0.0020685398,False,0.0052197245,False,0.76375747,True,0.0011724388,False,1
+seq001471,YP_013380344.1,putative major capsid protein,Enterococcus phage EfsSzw-1,negative,1.9089746e-06,False,0.00018473469,False,0.0050601084,False,0.0005449239,False,0.75215346,True,0.09315405,False,1
+seq000168,QDP50738.1,MAG: putative pre-neck appendage protein,Prokaryotic dsDNA virus sp.,positive,0.9868483,False,0.97843176,False,0.988821,False,0.8656178,False,0.89329773,False,0.98946536,False,0
+seq000149,CAB4216899.1,Pectate lyase superfamily protein,uncultured Caudovirales phage,positive,0.9968135,False,0.9916011,False,0.99352986,False,0.8656178,False,0.9409134,False,0.98263663,False,0
+seq000136,DAL22641.1,MAG TPA_asm: tailspike protein,Caudoviricetes sp.,positive,0.9887722,False,0.9724798,False,0.9735265,False,0.8656178,False,0.8888481,False,0.978515,False,0
+seq000131,DAQ72309.1,MAG TPA: tail spike protein,Caudoviricetes sp.,positive,0.9691041,False,0.9874774,False,0.9956318,False,0.8656178,False,0.907913,False,0.9852828,False,0
+seq000119,DAK82255.1,MAG TPA: peptidase,Caudoviricetes sp.,positive,0.9562431,False,0.96403587,False,0.9866731,False,0.8656178,False,0.89571446,False,0.9944459,False,0
+seq000103,DAM64846.1,MAG TPA: tail spike protein,Caudoviricetes sp.,positive,0.9800699,False,0.88107044,False,0.99687743,False,0.8656178,False,0.85297865,False,0.97745913,False,0
+seq000185,DAP17114.1,MAG TPA: tail fiber protein,Caudoviricetes sp.,positive,0.9898554,False,0.9661391,False,0.9651801,False,0.8656178,False,0.90455306,False,0.9825167,False,0
+seq000172,YP_009876128.1,tail protein,Vibrio phage vB_VspP_pVa5,positive,0.97115433,False,0.9420006,False,0.9738704,False,0.8656178,False,0.88526326,False,0.99026614,False,0
+seq000233,DAM07145.1,MAG TPA: peptidase,Caudoviricetes sp.,positive,0.9962373,False,0.9954809,False,0.9970476,False,0.8656178,False,0.89453685,False,0.9900838,False,0
+seq000248,QDP50310.1,MAG: putative pectate lyase superfamily protein,Prokaryotic dsDNA virus sp.,positive,0.96353376,False,0.9854591,False,0.9980958,False,0.8656178,False,0.8855387,False,0.98496175,False,0
+seq000098,DAS94575.1,MAG TPA: peptidase,Caudoviricetes sp.,positive,0.9976046,False,0.9275713,False,0.99539125,False,0.8656178,False,0.8975906,False,0.99015826,False,0
+seq000099,DAQ10714.1,MAG TPA: peptidase,Caudoviricetes sp.,positive,0.99402547,False,0.8531646,False,0.9968828,False,0.8656178,False,0.8073793,False,0.98129845,False,0
+seq000044,DAQ00971.1,"MAG TPA: GDSL like Lipase Acylhydrolase, partial",Caudoviricetes sp.,positive,0.9896287,False,0.9916038,False,0.99860364,False,0.8656178,False,0.77568716,False,0.9678321,False,0
+seq000021,DAT71808.1,MAG TPA: Baseplate component,Caudoviricetes sp.,positive,0.9518205,False,0.97378075,False,0.9905911,False,0.8656178,False,0.7398283,False,0.9160804,False,0
+seq000080,DAJ69148.1,MAG TPA: cytosolic glycerophosphodiester phosphodiesterase,Caudoviricetes sp.,positive,0.9984107,False,0.9762042,False,0.9897327,False,0.74514693,False,0.68993944,False,0.94214505,False,0
+seq000085,DAP86910.1,MAG TPA: acetyl esterase triad complex protein,Caudoviricetes sp.,positive,0.9968925,False,0.90711546,False,0.9843381,False,0.8656178,False,0.61610115,False,0.96997607,False,0
+seq000505,QMP18258.1,putative tail fiber protein,Ralstonia phage RpY1,positive,0.9766758,False,0.96607435,False,0.9898463,False,0.8656178,False,0.91425633,False,0.9548566,False,0
+seq000492,YP_010843554.1,tail fiber protein,Klebsiella phage K64-1,positive,0.9795455,False,0.9518018,False,0.9915531,False,0.8656178,False,0.95373666,False,0.9920587,False,0
+seq000491,YP_009800738.1,putative tail fiber protein,Burkholderia phage vB_BmuP_KL4,positive,0.96526074,False,0.9816332,False,0.990669,False,0.8656178,False,0.90539074,False,0.97116864,False,0
+seq000487,DAO81683.1,MAG TPA: tailspike protein,Caudoviricetes sp.,positive,0.8474121,False,0.88876337,False,0.9631093,False,0.8656178,False,0.93618655,False,0.9236463,False,0
+seq000422,DAF56525.1,MAG TPA: Pectate lyase,Podoviridae sp. ctnWS46,positive,0.8856959,False,0.53409714,False,0.98571926,False,0.8656178,False,0.76574916,False,0.81416804,False,0
+seq000429,DAT33138.1,MAG TPA: tailspike protein,Caudoviricetes sp.,positive,0.88520956,False,0.94777286,False,0.9949528,False,0.8656178,False,0.9049095,False,0.99355537,False,0
+seq000394,DAW48016.1,MAG TPA: tail spike protein,Caudoviricetes sp.,positive,0.97871894,False,0.8084801,False,0.9917713,False,0.8656178,False,0.8716693,False,0.9863559,False,0
+seq000412,DAX11128.1,MAG TPA: K5 LYASE,Caudoviricetes sp.,positive,0.9794261,False,0.98028886,False,0.99618953,False,0.8656178,False,0.92625755,False,0.99312156,False,0
+seq000327,DAJ48173.1,MAG TPA: tail spike protein,Caudoviricetes sp.,positive,0.95645297,False,0.89711565,False,0.99359906,False,0.81031156,False,0.86099577,False,0.9834508,False,0
+seq000373,DAK42187.1,MAG TPA: tail fiber protein,Caudoviricetes sp.,positive,0.9913018,False,0.9948585,False,0.9958311,False,0.8656178,False,0.88022345,False,0.9645282,False,0
+seq000379,DAY12571.1,MAG TPA: tailspike protein,Caudoviricetes sp.,positive,0.9951729,False,0.99243367,False,0.99437594,False,0.8656178,False,0.8881742,False,0.9745059,False,0
+seq000258,DAI52678.1,MAG TPA: peptidase,Bacteriophage sp.,positive,0.9902034,False,0.9912437,False,0.9986792,False,0.8656178,False,0.8888332,False,0.9929026,False,0
+seq000271,AUR96551.1,pectin lyase fold/virulence factor,Vibrio phage 1.226.O._10N.261.48.E5,positive,0.7956358,False,0.94471264,False,0.97711986,False,0.8656178,False,0.9295103,False,0.9892267,False,0
+seq000286,DAU88252.1,MAG TPA: Pectate lyase,Caudoviricetes sp.,positive,0.996549,False,0.9901273,False,0.99620324,False,0.8656178,False,0.89936477,False,0.99598545,False,0
+seq000306,DAE36441.1,MAG TPA: tail protein,Caudoviricetes sp.,positive,0.9770446,False,0.8260492,False,0.9928538,False,0.8656178,False,0.8264114,False,0.968666,False,0
+seq000309,DAR17042.1,MAG TPA: tailspike protein,Caudoviricetes sp.,positive,0.97750664,False,0.95953774,False,0.99151963,False,0.77520525,False,0.89766103,False,0.98689425,False,0
+seq000189,AUS02989.1,parallel beta-helix repeat protein,Vibrio phage 2.275.O._10N.286.54.E11,positive,0.98213714,False,0.9670767,False,0.9902292,False,0.8656178,False,0.8883707,False,0.9841868,False,0
+seq000228,DAF10586.1,"MAG TPA: Pectate lyase, partial",Caudoviricetes sp.,positive,0.9836785,False,0.9474849,False,0.9962793,False,0.8656178,False,0.9403684,False,0.99473155,False,0
+seq000209,QDP50449.1,MAG: putative head binding protein,Prokaryotic dsDNA virus sp.,positive,0.94122714,False,0.8711075,False,0.9867749,False,0.8656178,False,0.92035544,False,0.98914295,False,0
+seq000206,UOX38296.1,phosphodiester glycosidase family protein,Bacillus phage BUCT083,positive,0.99545646,False,0.989641,False,0.98800117,False,0.86391425,False,0.74542195,False,0.98801154,False,0
+seq000184,DAQ06298.1,MAG TPA: tail spike protein,Caudoviricetes sp.,positive,0.99508,False,0.98872805,False,0.996748,False,0.8656178,False,0.88132554,False,0.990507,False,0
+seq000268,CAB5220664.1,Pectate lyase superfamily protein,uncultured Caudovirales phage,positive,0.9889843,False,0.9733165,False,0.99501413,False,0.8656178,False,0.8935181,False,0.96684396,False,0
+seq000657,YP_012063413.1,DNA primase/helicase,Burkholderia phage Musica,negative,8.141649e-06,False,9.2944585e-10,False,0.00027380284,False,5.7963953e-06,False,0.3414899,False,0.015687877,False,0
+seq000646,YP_013396142.1,PcfJ-like protein,Enterococcus phage PEf771,negative,0.00012410944,False,1.0037644e-05,False,0.00028376645,False,1.7981503e-06,False,0.10373306,False,0.004568661,False,0
+seq000644,YP_013610701.1,DnaJ domain protein,Yasminevirus sp. GU-2018,negative,1.0573369e-06,False,1.3497923e-09,False,1.6215748e-05,False,2.7816565e-11,False,0.19397432,False,0.0009937998,False,0
+seq000636,YP_013609551.1,MAG: putative replicase protein,Dirlevirus faecenecus,negative,0.00017685605,False,9.178264e-07,False,3.469528e-05,False,1.0045471e-09,False,0.23903668,False,0.0038779047,False,0
+seq000629,YP_013613100.1,IVa2,Duck adenovirus 4,negative,6.1345327e-07,False,2.3031298e-06,False,0.00028878564,False,0.0001092669,False,0.28596106,False,0.0057204966,False,0
+seq000574,YP_002128497.1,tail fiber protein,Iodobacter phage PhiPLPE,positive,0.989344,False,0.96385396,False,0.9898893,False,0.8656178,False,0.914411,False,0.936129,False,0
+seq000536,QHI00738.1,tail fibers protein,Escherichia phage vB_EcoP_PHB19,positive,0.648452,False,0.75014573,False,0.9349387,False,0.8656178,False,0.8983318,False,0.9437567,False,0
+seq000509,DAO20799.1,MAG TPA: tail fiber protein,Caudoviricetes sp.,positive,0.99719477,False,0.993117,False,0.9959798,False,0.8656178,False,0.8669806,False,0.9833904,False,0
+seq000517,AZU99445.1,tailspike protein,Acinetobacter phage vB_AbaP_APK37,positive,0.98674136,False,0.868483,False,0.9813789,False,0.8656178,False,0.93138885,False,0.9877757,False,0
+seq000519,YP_007392887.1,tail protein,Klebsiella phage JD001,positive,0.9842812,False,0.9525031,False,0.98445743,False,0.8656178,False,0.93442106,False,0.9776718,False,0
+seq000718,YP_013032765.1,putative VP2,Pheasant-associated gyrovirus,negative,2.0267305e-05,False,4.0002983e-09,False,0.0015677977,False,2.595218e-15,False,0.116459765,False,0.001924876,False,0
+seq000709,YP_013609542.1,MAG: RNA-dependent RNA polymerase,Sanya levivirus 4,negative,5.6887617e-05,False,3.106208e-07,False,2.4512368e-05,False,8.0494935e-08,False,0.1684848,False,0.0022356873,False,0
+seq000708,YP_011714248.1,portal protein,Bacillus phage vB_BcM_Sam46,negative,8.309777e-06,False,0.004172415,False,0.00017207682,False,0.00013147034,False,0.30215928,False,0.017773304,False,0
+seq000699,YP_013611259.1,DEXDc helicase,Yasminevirus sp. GU-2018,negative,4.768476e-07,False,2.4772467e-05,False,0.009223273,False,0.0005718262,False,0.15443516,False,0.004099063,False,0
+seq000696,YP_009094690.1,ribonucleotide reductase,Marseillevirus sp. 'Melbournevirus',negative,7.7973414e-07,False,3.7315863e-07,False,0.0011090656,False,2.3959083e-06,False,0.37661192,False,0.0135009745,False,0
+seq000697,YP_013032884.1,nucleocapsid protein,Wufeng Chodsigoa smithii henipavirus 1,negative,3.3712204e-05,False,1.4319098e-06,False,0.0011468782,False,1.0565532e-07,False,0.31383026,False,0.003589911,False,0
+seq000674,YP_013610338.1,MAG: glycoprotein,Taraxacum cytorhabdovirus 1,negative,2.685171e-05,False,5.2018327e-06,False,5.2964602e-05,False,9.271892e-08,False,0.28240728,False,0.000102317514,False,0
+seq000741,YP_013609339.1,MAG: putative maturation/attachment protein,Cunavirus faecivicinum,negative,0.000119176446,False,7.4331274e-07,False,3.397414e-08,False,1.3368472e-05,False,0.3191129,False,0.0002453276,False,0
+seq000827,YP_013029402.1,Parp,Bemisia tabaci toti-like virus 2,negative,1.77834e-05,False,3.8533044e-06,False,0.00019112909,False,1.6779335e-11,False,0.30138057,False,0.0032412922,False,0
+seq000831,YP_013609548.1,MAG: RNA-dependent RNA polymerase,Sanya levivirus 3,negative,5.0617728e-05,False,2.8313998e-06,False,3.8468836e-05,False,6.85998e-08,False,0.38507634,False,0.0021646165,False,0
+seq000843,YP_013610037.1,capsid protein,Trichomonas vaginalis virus 5,negative,2.8514161e-05,False,2.1902845e-06,False,0.00035818093,False,2.1457407e-08,False,0.11600688,False,0.0045086173,False,0
+seq000841,YP_011898353.1,terminase,Ruminococcus phage phiRg507T2_3,negative,5.451561e-06,False,2.2147167e-06,False,0.0020670746,False,0.00039124617,False,0.06497488,False,0.002836221,False,0
+seq000761,YP_013032874.1,fusion protein,Jingmen Crocidura shantungensis henipavirus 1,negative,7.811298e-06,False,8.724369e-06,False,0.00036600794,False,0.00072139193,False,0.3660875,False,0.0028331291,False,0
+seq000782,YP_012020463.1,putative pinholin,Citrobacter phage vB_CfrD_BlueShadow,negative,0.00023254777,False,1.9528268e-05,False,0.0062782806,False,8.4510575e-06,False,0.2672691,False,0.008889149,False,0
+seq000813,YP_013610608.1,atlastin-2-like,Yasminevirus sp. GU-2018,negative,7.870475e-06,False,6.3858444e-08,False,0.0022864628,False,0.00017291895,False,0.30568653,False,0.0006689589,False,0
+seq000730,YP_013611845.1,insulin-degrading enzyme,Yasminevirus sp. GU-2018,negative,2.345249e-06,False,1.0442694e-06,False,0.0054511176,False,7.2783655e-06,False,0.16787753,False,0.0087455,False,0
+seq000892,YP_013611381.1,ubiquitin-activating enzyme E1,Yasminevirus sp. GU-2018,negative,3.6679119e-06,False,9.4533004e-07,False,0.0025528048,False,4.967094e-05,False,0.37253803,False,0.0026458057,False,0
+seq000879,YP_011191684.1,putative tape measure protein,Pseudomonas phage POR1,negative,0.016399365,False,0.00087001664,False,0.0032480902,False,0.00032818477,False,0.26506516,False,0.02079365,False,0
+seq000872,YP_013036297.1,P4 protein,Triticum yellow stripe virus,negative,4.446557e-07,False,4.477296e-12,False,7.0900445e-05,False,2.825382e-10,False,0.19258924,False,0.0018699844,False,0
+seq000857,YP_009094604.1,conserved ATPase,Marseillevirus sp. 'Melbournevirus',negative,1.4552388e-06,False,2.7930837e-06,False,0.000111741705,False,1.8608253e-05,False,0.16836236,False,0.00040323415,False,0
+seq000915,YP_013611601.1,serine/threonine protein kinase,Yasminevirus sp. GU-2018,negative,1.5911379e-05,False,1.3526854e-07,False,0.0015293442,False,1.6308432e-12,False,0.2730297,False,0.008326473,False,0
+seq000667,YP_012892890.1,virulence-associated protein E,Bacillus phage vB_BceS_LY5,negative,7.729774e-07,False,6.9020434e-06,False,0.0003961082,False,3.1574416e-07,False,0.3042837,False,0.0062960302,False,0
+seq000655,YP_013613149.1,MAG: nucleocapsid protein,Angavokely henipavirus,negative,0.00014606926,False,2.1842704e-06,False,0.00093267154,False,9.768497e-09,False,0.26393828,False,0.009891445,False,0
+seq000653,YP_013609946.1,putative structural/gag protein,Fusarium virguliforme dsRNA mycovirus 2,negative,3.2565025e-05,False,2.4811072e-06,False,0.00229558,False,6.339679e-08,False,0.10858507,False,0.04567093,False,0
+seq000686,YP_013611564.1,ATP-dependent helicase homolog,Yasminevirus sp. GU-2018,negative,6.076771e-07,False,2.1312484e-08,False,1.3508922e-05,False,3.8203184e-06,False,0.24301395,False,0.0059922785,False,0
+seq000577,QOE32401.1,tail fiber protein,Klebsiella phage Muenster,positive,0.9586121,False,0.74404013,False,0.9954266,False,0.8656178,False,0.87407357,False,0.9756482,False,0
+seq000603,YP_012792020.1,terminase,"Leptolyngbya phage LPP-2, strain SPI",negative,1.1083967e-05,False,1.8951575e-06,False,0.0006044389,False,0.0018152844,False,0.1007431,False,0.0037729393,False,0
+seq000607,YP_012029854.1,tail fiber protein,Escherichia phage vB_EcoS_SA30RD,negative,0.006253625,False,0.0006166118,False,0.030018277,False,0.004328525,False,0.45539024,False,0.04299776,False,0
+seq000622,YP_013033260.1,nucleocapsid protein,denwin virus,negative,2.0215475e-05,False,1.5928058e-06,False,0.0008183659,False,1.1832794e-14,False,0.3006514,False,0.006783963,False,0
+seq000540,DAI63406.1,MAG TPA: tailspike protein,Caudoviricetes sp.,positive,0.9782933,False,0.9011143,False,0.9791044,False,0.8656178,False,0.9203575,False,0.9653472,False,0
+seq000548,YP_009849292.1,tail spike protein,Serratia phage Moabite,positive,0.96187335,False,0.7998217,False,0.9869168,False,0.8656178,False,0.92523766,False,0.98736227,False,0
+seq000554,BAQ02841.1,putative tail fiber protein,Klebsiella phage K64-1,positive,0.95365125,False,0.91218734,False,0.99733424,False,0.8656178,False,0.9446001,False,0.9919424,False,0
+seq001054,YP_013610333.1,MAG: nucleocapsid,Taraxacum cytorhabdovirus 1,negative,0.00021348149,False,3.0194467e-08,False,0.00022177365,False,6.939325e-11,False,0.13027388,False,0.0061719837,False,0
+seq001048,YP_013612670.1,ankyrin repeat,Cedratvirus lausannensis,negative,4.0230412e-07,False,2.982543e-07,False,0.00020873059,False,0.0360713,False,0.38325182,False,0.01866831,False,0
+seq001035,YP_013610747.1,FtsJ-like methyltransferase,Yasminevirus sp. GU-2018,negative,8.144337e-06,False,8.0894555e-05,False,0.0008700229,False,1.1648711e-08,False,0.21817866,False,0.0005377065,False,0
+seq001012,YP_009094648.1,conserved putative translation elongation factor 1-alpha,Marseillevirus sp. 'Melbournevirus',negative,2.0646386e-10,False,6.557723e-12,False,0.0003454061,False,2.5795632e-08,False,0.23003381,False,0.002081323,False,0
+seq000994,YP_013022849.1,collagen-like triple helix repeat-containing protein,Cedratvirus kamchatka,negative,2.864361e-07,False,2.0577609e-05,False,1.7173406e-08,False,4.6895246e-05,False,0.3090997,False,0.005847928,False,0
+seq001006,YP_013611626.1,XRN 5'-3' exonuclease,Yasminevirus sp. GU-2018,negative,6.7830865e-06,False,4.8197734e-08,False,8.218552e-05,False,1.6357943e-11,False,0.15930596,False,8.79057e-05,False,0
+seq000988,YP_013609090.1,hypotheticl protein,Escherichia phage vB_Eco_Sip,negative,0.00027923967,False,1.7398629e-06,False,0.0009446087,False,8.937387e-06,False,0.06468187,False,0.0077876886,False,0
+seq000972,YP_011825224.1,putative capsid protein,Alteromonas phage phiAFP1,negative,0.16343796,False,0.000800548,False,0.0010371346,False,0.0006796751,False,0.42915505,False,0.0001656466,False,0
+seq000896,YP_012023254.1,receptor binding protein,Jeilongvirus chaetodipodis,negative,7.615177e-07,False,4.200984e-07,False,0.00048207483,False,6.9236347e-07,False,0.30659053,False,0.0011141159,False,0
+seq000950,YP_012020617.1,putative recombinase,Citrobacter phage vB_CfrD_SorkZaugg,negative,9.986103e-07,False,4.0653733e-05,False,0.0010426006,False,0.000120347904,False,0.13809724,False,0.0009889308,False,0
+seq000946,YP_013023269.1,"RNA-dependent RNA polymerase, partial",Totivirus nijyuroku,negative,0.00025183905,False,2.6597265e-05,False,1.091399e-05,False,3.0556029e-09,False,0.19514234,False,0.0015698038,False,0
+seq001185,YP_011898393.1,helicase,Ruminococcus phage phiRg507T2_3,negative,8.2772397e-07,False,1.2081283e-05,False,0.000507393,False,1.5231133e-07,False,0.26434094,False,0.005983032,False,0
+seq001158,YP_013019462.1,P1,Ornithogalum virus 5,negative,9.726714e-06,False,3.5937726e-06,False,2.0465177e-05,False,1.111823e-07,False,0.4226894,False,0.0004799133,False,0
+seq001153,YP_013610617.1,DEXDc helicase,Yasminevirus sp. GU-2018,negative,6.631392e-07,False,3.2807675e-06,False,1.1519717e-05,False,0.0023295726,False,0.20933442,False,0.001440722,False,0
+seq001128,YP_011697326.1,putative exodeoxyribonuclease,Escherichia phage navn,negative,4.8945923e-05,False,5.512548e-05,False,0.0008302567,False,5.8788714e-06,False,0.14995232,False,0.003656214,False,0
+seq001081,YP_013424626.1,holin,Klebsiella phage IME268,negative,0.00024658712,False,0.0003644054,False,0.018052371,False,0.00022896663,False,0.29382718,False,0.0015442689,False,0
+seq001223,YP_012883400.1,anti-restriction nuclease,Escherichia phage A73,negative,0.00057388813,False,1.291285e-05,False,0.0010845813,False,0.09194856,False,0.054962672,False,0.0036785842,False,0
+seq001207,YP_012792009.1,endopeptidase,"Leptolyngbya phage LPP-2, strain SPI",negative,0.0077854227,False,0.010054082,False,0.00031497714,False,0.22780709,False,0.21099272,False,0.014230891,False,0
+seq001245,YP_011698777.1,putative HNH endonuclease 1,Escherichia phage pangalan,negative,4.2663223e-07,False,4.5462818e-07,False,0.00070483465,False,5.377156e-06,False,0.2423946,False,0.007694704,False,0
+seq001250,YP_013610061.1,capsid protein,Culex inatomii totivirus,negative,8.381665e-05,False,7.343914e-05,False,0.001333652,False,6.778875e-14,False,0.12770234,False,0.00062021747,False,0
+seq001275,YP_012611799.1,replication protein,Escherichia phage vB_EcoM-613R3,negative,4.6454606e-06,False,8.655221e-08,False,4.6867285e-06,False,3.5193893e-11,False,0.30573368,False,0.0009614442,False,0
+seq001291,YP_012087452.1,lysin,Enterococcus phage vB_OCPT_CCS1,negative,0.11550308,False,0.0016483732,False,0.008780553,False,0.0028820618,False,0.43687746,False,0.021116467,False,0
+seq001264,YP_013031995.1,glycoprotein,Strawberry virus 3,negative,1.6419304e-05,False,3.79277e-09,False,7.16448e-06,False,4.6907833e-10,False,0.1294589,False,2.0893265e-06,False,0
+seq001270,YP_013612701.1,putative translation elongation factor 1-alpha,Cedratvirus lausannensis,negative,4.5616916e-06,False,3.4755477e-08,False,6.471867e-05,False,3.4744215e-05,False,0.22406103,False,0.0074580656,False,0
+seq001317,YP_011815951.1,A1 protein,Salmonella phage GEC_vB_N5,negative,0.0018454688,False,0.019210957,False,0.0003232839,False,1.554873e-05,False,0.41687182,False,0.003801416,False,0
+seq001300,NP_942553.1,nucleocapsid protein,Orthohantavirus dobravaense,negative,8.21519e-05,False,1.4107817e-07,False,7.94676e-05,False,5.749614e-10,False,0.31146675,False,0.009384345,False,0
+seq001350,YP_013611714.1,P-loop NTPase domain protein,Yasminevirus sp. GU-2018,negative,4.9868235e-05,False,7.442493e-06,False,0.0072765946,False,8.741727e-05,False,0.11452162,False,0.0014762909,False,0
+seq001181,YP_012611749.1,ribosome association toxin,Escherichia phage vB_EcoM-613R3,negative,1.8346844e-06,False,6.2980804e-10,False,0.00018447208,False,3.193113e-05,False,0.32457113,False,0.09731521,False,0
+seq001187,YP_011796299.1,large terminase,Arthronema virus TR020,negative,1.8370623e-05,False,1.3788848e-06,False,0.0003489524,False,8.6846536e-05,False,0.11367858,False,0.0041705375,False,0
+seq001202,YP_011874486.1,zona occludens toxin,Vibrio phage vB_Vipa71,negative,6.68613e-05,False,1.8924004e-07,False,0.0002936507,False,2.210928e-05,False,0.16845982,False,0.0049722358,False,0
+seq001075,YP_013610353.1,glycoprotein,Medicago sativa virus 1,negative,5.824639e-06,False,3.0497702e-08,False,6.312353e-06,False,3.8572234e-10,False,0.14714713,False,6.566631e-06,False,0
+seq001078,YP_011217240.1,putative replicative helicase/primease,Escherichia phage L_AB-2017,negative,0.0007054563,False,1.537172e-05,False,0.007621668,False,2.4490148e-05,False,0.24308273,False,0.011827167,False,0
+seq001407,YP_011217306.1,putative helicase-primase,Escherichia phage P_AB-2017,negative,0.00043409472,False,1.4037728e-05,False,0.0008889033,False,7.005556e-07,False,0.27724436,False,0.012643967,False,0
+seq001397,YP_012892873.1,DNA polymerase,Bacillus phage vB_BceS_LY5,negative,4.877285e-07,False,3.701663e-08,False,0.00018057296,False,1.3062804e-06,False,0.23622903,False,0.010160806,False,0
+seq001382,YP_012054243.1,replicative DNA helicase,Escherichia phage UTI-CM001,negative,0.0002834782,False,1.3253603e-05,False,0.0039109057,False,2.7893357e-06,False,0.24911344,False,0.019005243,False,0
+seq001373,YP_013610054.1,RNA-dependent RNA polymerase,Culex vishnui subgroup totivirus,negative,0.00012776467,False,6.136796e-06,False,8.599095e-06,False,2.7961866e-09,False,0.1481912,False,0.0007713098,False,0
+seq001370,YP_013607534.1,Phage primase,Enterococcus phage vB_EfaS_140,negative,5.1891084e-06,False,0.014877433,False,0.00072768,False,0.00039384168,False,0.41797283,False,0.001893196,False,0
+seq001449,YP_013610265.1,nucleocapsid protein,Pinus banksiana virus 1,negative,1.3933708e-05,False,1.7887724e-06,False,0.00028891754,False,1.4390027e-12,False,0.17480016,False,0.0021117034,False,0
+seq001444,YP_013611169.1,DNA-directed RNA polymerase II subunit 1-like,Yasminevirus sp. GU-2018,negative,1.7929035e-06,False,1.8916346e-08,False,0.00090334174,False,2.166095e-05,False,0.4307675,False,0.009243639,False,0
+seq001421,YP_013610060.1,RNA-dependent RNA polymerase,Aedes aegypti totivirus,negative,2.9688057e-05,False,1.6372816e-06,False,1.161526e-05,False,3.7662615e-10,False,0.20351896,False,0.00030695015,False,0
+seq001494,YP_013023290.1,hemagglutinin-neuraminidase,Respirovirus rupicaprae,negative,6.989469e-05,False,5.8677422e-05,False,0.002770457,False,0.002326879,False,0.17452915,False,0.005447404,False,0
+seq001489,YP_013029559.1,capsid protein,Cyclopterus lumpus toti-like virus,negative,0.00030237145,False,0.0004665302,False,0.0048478195,False,1.2994581e-08,False,0.46579033,False,0.008774579,False,0
+seq001466,YP_013613139.1,matrix protein,Hippocampus erectus paramyxovirus 1,negative,5.2308696e-06,False,5.7834354e-10,False,7.377256e-06,False,5.5765706e-16,False,0.12900873,False,0.0023437378,False,0
+seq001518,YP_011360383.1,terminase small subunit,Listeria phage PSU-VKH-LP040,negative,1.8415473e-06,False,4.004961e-06,False,0.00050112506,False,2.4973806e-06,False,0.17124712,False,0.0039031396,False,0
+seq001557,YP_013613150.1,MAG: phosphoprotein,Angavokely henipavirus,negative,1.6566651e-06,False,1.3041261e-05,False,0.0011712534,False,2.2709573e-12,False,0.12777734,False,6.640196e-05,False,0
+seq001549,YP_011698085.1,packaging and recombination endonuclease,Escherichia phage nomine,negative,6.0045706e-05,False,7.9268415e-07,False,0.0002571878,False,1.2744313e-08,False,0.27697575,False,0.015114159,False,0
+seq001586,YP_013611571.1,glycosyl transferase family 2,Yasminevirus sp. GU-2018,negative,1.8352588e-05,False,2.6751792e-07,False,0.0003131602,False,0.00044783656,False,0.3482978,False,0.16410856,False,0
+seq001427,YP_013035385.1,P2ab,Mimosa mosaic virus,negative,2.5196161e-05,False,1.4997778e-05,False,2.0528882e-05,False,1.266927e-09,False,0.40392476,False,0.01041451,False,0
+seq001591,YP_013611100.1,glycosyltransferase,Yasminevirus sp. GU-2018,negative,0.0078109982,False,5.6161127e-05,False,0.00023830167,False,2.7770093e-07,False,0.24261916,False,0.0019489634,False,0
+seq001614,YP_013025863.1,putative P1 protein,Green Sichuan pepper enamovirus,negative,1.0660652e-05,False,3.3072888e-07,False,2.866452e-05,False,1.3265605e-10,False,0.42280063,False,0.0006512869,False,0
+seq001641,YP_012791995.1,DNA primase/helicase,"Leptolyngbya phage LPP-2, strain SPI",negative,1.0729775e-05,False,8.843655e-07,False,0.0023920622,False,5.768442e-07,False,0.24017172,False,0.0023033943,False,0
+seq001619,YP_013610787.1,ATP-dependent DNA helicase,Yasminevirus sp. GU-2018,negative,0.00036352422,False,0.00026217633,False,0.0040269373,False,0.00021221874,False,0.07277015,False,0.0021599538,False,0
+seq001649,YP_013610052.1,RNA-dependent RNA polymerase,Aedes aegypti toti-like virus,negative,4.9154914e-05,False,3.6526745e-07,False,2.7058486e-06,False,5.6542837e-09,False,0.1522434,False,0.00055806484,False,0
+seq001671,YP_011711867.1,HNH endonuclease,Salmonella phage falkor,negative,9.508182e-07,False,7.95292e-07,False,0.00026734767,False,5.903705e-10,False,0.34096384,False,0.0023458113,False,0
+seq001673,YP_013025465.1,RNA-dependent RNA polymerase,Malassezia sympodialis mycovirus,negative,0.00026000862,False,1.186102e-05,False,8.611158e-06,False,1.44756145e-08,False,0.19154994,False,0.0011495107,False,0
+seq001646,YP_013610059.1,capsid,Aedes aegypti totivirus,negative,0.00030321613,False,0.0001522926,False,0.0014436026,False,5.450272e-11,False,0.25060192,False,0.021190453,False,0
+seq001676,YP_011936888.1,major capsid protein,Klebsiella phage vB_KpnS-VAC4,negative,2.296267e-05,False,5.0747467e-06,False,0.00302184,False,6.641172e-06,False,0.41778508,False,0.0598201,False,0
+seq001700,YP_011714261.1,putative tail tape measure protein,Bacillus phage vB_BcM_Sam46,negative,0.00011704528,False,9.408049e-06,False,3.9000974e-05,False,7.9814964e-07,False,0.20258322,False,0.005163315,False,0
+seq001705,YP_013029272.1,coat protein,Tea-oil camellia-associated totivirus 1,negative,8.6810505e-05,False,8.1714725e-06,False,0.0016772625,False,2.8309702e-10,False,0.11481594,False,0.00149713,False,0
+seq001726,YP_013610927.1,Cytochrome b5-like heme/steroid binding domain,Yasminevirus sp. GU-2018,negative,1.7798709e-06,False,9.504305e-08,False,0.00019872822,False,0.00023839666,False,0.38278118,False,0.020095078,False,0
+seq001734,YP_013609928.1,MAG: nucleocapsid,Huanggang Rhabd tick virus 1,negative,0.00040969145,False,2.8169103e-07,False,0.00044962647,False,2.7972255e-10,False,0.123547666,False,0.019523328,False,0
+seq001752,YP_012768919.1,nucleoside triphosphate hyrolase,Bacillus phage vB_BceS_LY1,negative,9.601628e-07,False,2.460502e-05,False,0.00042789485,False,1.0601934e-06,False,0.33108357,False,0.004192876,False,0
+seq001761,YP_013610311.1,MAG: glycoprotein,Betanucleorhabdovirus picridis,negative,0.00017800854,False,3.256615e-06,False,0.000128976,False,1.0008947e-08,False,0.06923267,False,4.832467e-05,False,0
+seq001766,YP_013611148.1,glutamine tRNA-synthetase,Yasminevirus sp. GU-2018,negative,1.4545638e-08,False,7.4162587e-09,False,0.00018490176,False,3.4922748e-06,False,0.19619451,False,0.074648626,False,0
