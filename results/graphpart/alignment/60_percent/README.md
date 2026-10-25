@@ -1,9 +1,9 @@
 # alignment/60_percent/
 
-Exploratory/comparison split — **not used in the final thesis results.** Output of GraphPart at 60% identity threshold, run in parallel with the 40% split via the same command-line workflow.
+Exploratory comparison split — **not used in the final thesis results.** GraphPart at a 60% identity threshold, run in parallel with the 40% split.
 
 ## Files
 
-- `60pct_train.fasta`, `60pct_valid.fasta`, `60pct_test.fasta` — train/valid/test sequences at 60% identity threshold.
+- `60pct_train.fasta`, `60pct_valid.fasta`, `60pct_test.fasta`
 
-Kept for reference in case a 40% vs. 60% identity comparison is added to the thesis discussion; not currently part of the reported pipeline.
+Kept for reference only; no model reported in the thesis was trained or evaluated on this split.

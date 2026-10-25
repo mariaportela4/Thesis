@@ -1,22 +1,26 @@
 # src/
 
-Core pipeline scripts: benchmarking and external tool retraining.
+Core pipeline scripts: dataset preparation, benchmarking and external tool retraining.
 
 ## Files
 
-- `benchmark_comparison.py` — runs all 8 models (6 thesis models + retrained DepoScope + retrained DePP) on the held-out test set, sourced directly from `../data/final_dataset_40.csv` (split == 'test'), and produces the final comparison outputs: `../results/benchmark_metrics.csv`, `../results/benchmark_barplot.png`, and per-model `../results/confusion_matrix_*.png`. Includes hard safety checks comparing `y_test.npy` against CSV-derived labels to catch silent data-alignment bugs.
-- `deposcope_retrain.py` — retrains DepoScope on the thesis dataset (per advisor instruction, DepoScope is retrained rather than used off-the-shelf, for a fair benchmark). Outputs to `../results/deposcope_retrain/`.
-- `make_train_fasta.py` — generates a split-specific FASTA file from `../data/final_dataset_40.csv`, e.g. `python make_train_fasta.py --dataset-csv ../data/final_dataset_40.csv --split test`. Used to (re)produce `../data/train_sequences_clean.fasta` and `../data/test_sequences_clean.fasta` aligned to the GraphPart 40% split.
-- `prepare_split_embeddings.py` — splits the full embedding `.npy` files (`../results/embeddings/`) into train/val/test according to the GraphPart assignment, producing `../results/embeddings/split/`.
-- `normalize_ambiguous_aa.py` — normalises ambiguous amino acid residues (B, Z, J, U, O → X) across the full merged input FASTA. Run once, upstream of everything else, to produce `../data/merged_input_normalized.fasta`, the single canonical sequence source used by every downstream branch of the pipeline (CD-HIT, GraphPart, embedding extraction, DePP/DepoScope retraining).
-- `make_train_fasta.py` — generates a split-specific FASTA file from `../data/final_dataset_40.csv` (e.g. `python make_train_fasta.py --merged-fasta ../data/merged_input_normalized.fasta --dataset-csv ../data/final_dataset_40.csv --split test`). Used to (re)produce `../data/train_sequences_clean.fasta` and `../data/test_sequences_clean.fasta` aligned to the GraphPart 40% split. Assumes its input FASTA is already normalised — no longer drops ambiguous sequences.
+- `benchmark_comparison.py` — evaluates all 10 models on the held-out test set, sourced from `../data/final_dataset_40.csv` (split == 'test'), and produces `../results/benchmark_metrics.csv`, the benchmark figures and the per-model confusion matrices. Applies a 0.5 threshold uniformly and cross-checks `y_test.npy` against CSV-derived labels to catch silent alignment bugs.
+- `depp_retrain.py` — retrains DePP's random forest, reusing the feature extraction and training code from the DePP repository (cloned externally, passed via `--depp-repo`). Sequences with non-standard residues are dropped before featurisation. Outputs to `../results/depp_retrain/`.
+- `deposcope_retrain.py` — retrains DepoScope's CNN head on the thesis dataset, keeping its fine-tuned ESM-2 component frozen. Early stopping uses the dataset's own validation partition. Outputs to `../results/deposcope_retrain/`.
+- `dposfinder_retrain.py` — retrains DposFinder through its own `code/main.py`, run as a subprocess in a separate conda environment. Converts the dataset into DposFinder's FASTA format and truncates sequences to 1024 residues. Outputs to `../results/dposfinder_retrain_trainonly/`.
+- `phagedpo_retrain.py` — retrains PhageDPO's SVM on its own hand-crafted descriptor set, using the tool's grid search (10-fold CV, MCC). Outputs to `../results/phagedpo_retrain/`.
+- `normalize_ambiguous_aa.py` — maps ambiguous residues (B, Z, J, U, O → X) across the merged FASTA, producing `../data/merged_input_normalized.fasta`, the canonical sequence source for every downstream branch.
+- `make_train_fasta.py` — writes a split-specific FASTA from the canonical dataset table. Assumes its input FASTA is already normalised.
+- `export_split_fasta.py` — writes per-split FASTA files keyed by `orig_id`, used for the pairwise identity audit rather than by the training pipeline.
+- `prepare_split_embeddings.py` — partitions the full embedding arrays into train/val/test according to the split column.
+- `remove_duplicates.py` — removes exact duplicates from the positive set, with RefSeq > GenBank > PDB priority and one representative chain per PDB structure.
 
 ## Subfolders
 
-- `datasets/` — data-fetching utilities.
-- `embedding/` — scripts to generate protein language model embeddings (ESM-2, ProtBERT, ProtT5-XL). See `embedding/README.md`.
-- `nn/` — model class definitions (DNN, CNN), training scripts, hyperparameter tuning, and shared evaluation metrics. See `nn/README.md`.
+- `datasets/` — dataset construction and audit scripts
+- `embedding/` — protein language model embedding generation
+- `nn/` — model definitions, training, tuning and error analysis
 
 ## Notes
 
-- DePP retraining (`depp_retrain.py`) lives inside `Depolymerase-Predictor/DePP_CLI/` (external repo, gitignored), not in this folder — see `../results/depp_retrain/README.md`.
+- All four external tools are retrained on the same training split (1,515 sequences) and evaluated on the same test set, so benchmark differences reflect the modelling approach rather than the data.

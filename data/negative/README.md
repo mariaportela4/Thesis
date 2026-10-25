@@ -1,16 +1,22 @@
 # data/negative/
 
-Negative class: non-DPO protein sequences, from raw collection through to the balanced 1:2 (positive:negative) sample used in the pipeline.
+Negative class: phage proteins that are explicitly not depolymerases, from retrieval through to the balanced 1:2 sample.
 
 ## Files, in pipeline order
 
-1. `negative.faa` — raw negative sequence collection, fetched by `../../src/datasets/ncbi_fetch.py` (capped at 30,000 sequences).
-2. `negative_ids.txt` — corresponding NCBI protein UIDs, one per line (written by `ncbi_fetch.py` alongside `negative.faa`).
-3. `negative_nohyp.faa` — after removal of hypothetical proteins (pipeline step 1): 24,929 kept, 5,071 removed.
-4. `negative_dedup.faa` — after duplicate removal (pipeline step 2, `../remove_duplicates.py`): 23,102 unique sequences (1,827 duplicates removed from the 24,929 above).
-5. CD-HIT clustering (80% identity) is applied next, producing `../../results/cdhit/negative_cdhit80.fasta` (13,377 sequences) — see `../../results/cdhit/README.md`.
-6. `negative_sampled.fasta` — final balanced negative set, sampled **from the CD-HIT-clustered output** (not from `negative_dedup.faa`) at a 1:2 ratio against the CD-HIT-clustered positive count (593 positives → 1,186 negatives sampled), using `random.seed(42)` for reproducibility. This is merged with the positive CD-HIT output to build `../merged_input.fasta`, ahead of GraphPart.
+1. `negative.faa` — candidate sequences fetched by `../../src/datasets/ncbi_fetch.py` from NCBI RefSeq, restricted to Caudoviricetes. Depolymerase-related title keywords and the seven positive-class domain accessions are excluded at query time.
+2. `negative_ids.txt` — the corresponding NCBI protein UIDs.
+3. `negative_nohyp.faa` — after removal of hypothetical proteins.
+4. `negative_dedup.faa` — after exact-duplicate removal (first occurrence kept, without the accession-priority rule used for the positive set): 1,854 sequences.
+5. CD-HIT at 80% identity is applied next, producing `../../results/cdhit/negative_cdhit80.fasta` (1,237 sequences).
+6. `negative_sampled.fasta` — final balanced set, sampled **from the CD-HIT output** at a 1:2 ratio against the clustered positive count (593 positives → 1,186 negatives), using `random.seed(42)`.
+
+## Length-matched sampling
+
+Viral proteins in RefSeq skew strongly towards short sequences, whereas depolymerases are typically large. Sampling uniformly would confound length with class, letting a classifier separate the two by length rather than function. `ncbi_fetch.py` therefore retrieves lengths first for the full candidate pool, divides the positive length distribution into 25-aa strata, and samples negatives per stratum in proportion to the positives it contains.
+
+This reduced the Kolmogorov-Smirnov statistic between the two distributions from 0.292 to 0.195 at the candidate stage. Some residual mismatch remains in the final dataset (D = 0.198).
 
 ## Notes
 
-- Class balancing happens **after** CD-HIT, not before — the 1:2 ratio is applied to the already-clustered (non-redundant) sequence sets.
+- Class balancing happens **after** CD-HIT, so the 1:2 ratio is applied to the already-clustered sets.

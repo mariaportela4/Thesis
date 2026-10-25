@@ -1,6 +1,6 @@
 # results/models/
 
-Trained weights for the six thesis classifier models (2 architectures × 3 embedding types), produced by `../../nn/train_dnn.py` and `../../nn/train_cnn.py`.
+Trained weights for the six thesis classifier models (2 architectures × 3 embedding types), produced by `../../src/nn/train_dnn.py` and `../../src/nn/train_cnn.py`.
 
 ## Files
 
@@ -9,6 +9,7 @@ Trained weights for the six thesis classifier models (2 architectures × 3 embed
 
 ## Notes
 
-- Each checkpoint corresponds to the epoch with lowest validation loss (best-checkpoint saving), not the final training epoch — see `../../nn/README.md`.
-- `dnn_prott5.pt` is currently the best-performing model on the held-out test set (F1≈0.915, AUC≈0.986) — see `../benchmark_metrics.csv`.
-- `cnn_bert.pt` is consistently the weakest of the six (hypothesized architecture–embedding mismatch between CNN and ProtBERT).
+- Each checkpoint corresponds to the epoch at which early stopping halted training (patience 5, min delta 1e-4, maximum 50 epochs), not the epoch of lowest validation loss. Both epochs are recorded in `../history/*_summary.json`.
+- All six were trained with seed 42; the seed is recorded in each summary file.
+- `dnn_esm.pt` and `dnn_prott5.pt` are the best-performing models on the held-out test set (F1 0.9913, no false positives) — see `../benchmark_metrics.csv`.
+- `cnn_bert.pt` is the weakest of the six (F1 0.8296), driven by 21 false positives.

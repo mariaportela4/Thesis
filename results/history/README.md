@@ -1,14 +1,24 @@
 # results/history/
 
-Per-epoch training curves (loss/metrics) for each of the six thesis models, produced by `../../nn/train_dnn.py` and `../../nn/train_cnn.py`.
+Per-epoch training curves and run summaries for each of the six thesis models, produced by `../../src/nn/train_dnn.py` and `../../src/nn/train_cnn.py`.
 
 ## Files
 
-- `dnn_esm_history.csv`, `dnn_bert_history.csv`, `dnn_prott5_history.csv`
-- `cnn_esm_history.csv`, `cnn_bert_history.csv`, `cnn_prott5_history.csv`
+- `{arch}_{embedding}_history.csv` — per-epoch training and validation loss.
+- `{arch}_{embedding}_summary.json` — seed, stopping epoch and epoch of lowest validation loss for that run.
 
-Each file logs per-epoch training/validation loss and metrics.
+## Stopping epochs
+
+| Model | Stop epoch | Best epoch |
+|---|---|---|
+| dnn_esm | 8 | 3 |
+| dnn_bert | 11 | 6 |
+| dnn_prott5 | 15 | 10 |
+| cnn_prott5 | 23 | 18 |
+| cnn_bert | 35 | 30 |
+| cnn_esm | 48 | 43 |
 
 ## Notes
 
-- These curves show late-epoch overfitting for some models (e.g. DNN+ProtT5, DNN+ProtBERT) — this is expected given best-checkpoint saving (`val_loss < best_val_loss`) is used, so the reported test-set model corresponds to the best-validation-loss epoch, not the final one.
+- Training uses early stopping with a 50-epoch ceiling; the weights kept are those of the stopping epoch, so the gap between the two columns above is expected.
+- Four of the six runs stopped at exactly the same epoch as the corresponding Optuna trial (see `../tuning/`), which confirms that the seeded runs are reproducible.
