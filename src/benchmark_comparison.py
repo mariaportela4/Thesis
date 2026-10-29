@@ -304,9 +304,28 @@ metrics_df.to_csv(OUTPUT_DIR / "benchmark_metrics.csv", index=False)
 print(f"\n[+] Metrics table saved to {OUTPUT_DIR / 'benchmark_metrics.csv'}")
 print(metrics_df.to_string(index=False))
 
+# ----------------------------
+# 8. Per-sequence predictions (for bootstrap CIs)
+# ----------------------------
+preds_df = pd.DataFrame({
+    "seq_id": test_df["seq_id"].to_numpy(),
+    "label": y_true,
+})
+for name, r in results.items():
+    probs_col = np.asarray(r["probs"]).ravel()
+    if len(probs_col) != len(preds_df):
+        raise ValueError(
+            f"{name}: {len(probs_col)} probabilities for "
+            f"{len(preds_df)} test sequences"
+        )
+    preds_df[name] = probs_col
+
+preds_path = OUTPUT_DIR / "benchmark_predictions.csv"
+preds_df.to_csv(preds_path, index=False)
+print(f"[+] Per-sequence predictions saved to {preds_path}")
 
 # ----------------------------
-# 8. Bar plot: Precision, Recall, F1 (as previously requested by the supervisor)
+# 9. Bar plot: Precision, Recall, F1 (as previously requested by the supervisor)
 # ----------------------------
 EXTERNAL_TOOLS = {"deposcope_retrained", "depp_retrained", "phagedpo_retrained",
                    "dposfinder_retrained"}
@@ -359,7 +378,7 @@ plt.close()
 
 
 # ----------------------------
-# 9. Confusion matrices for the four retrained external tools
+# 10. Confusion matrices for the four retrained external tools
 # ----------------------------
 confusion_matrix_tools = ["deposcope_retrained", "depp_retrained", "phagedpo_retrained"]
 if INCLUDE_DPOSFINDER:
@@ -373,7 +392,7 @@ for name in confusion_matrix_tools:
 
 
 # ----------------------------
-# 10. Additional visualizations: heatmap, dot plot, radar small multiples.
+# 11. Additional visualizations: heatmap, dot plot, radar small multiples.
 #     Reuse ordered_df from section 8 (already sorted: thesis models first
 #     by F1, then external tools by F1) so all benchmark figures share the
 #     same model ordering.
